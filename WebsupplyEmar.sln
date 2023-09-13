@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33815.320
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebsupplyEmar.API", "WebsupplyEmar.API\WebsupplyEmar.API.csproj", "{90A471CC-2561-4ED8-9FC1-8CC0DA728B16}"
+	ProjectSection(ProjectDependencies) = postProject
+		{95561EA5-266E-4362-A39D-88FA0DF8609B} = {95561EA5-266E-4362-A39D-88FA0DF8609B}
+		{9BC6D97C-14A8-4D42-BFAD-9889195310C8} = {9BC6D97C-14A8-4D42-BFAD-9889195310C8}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebsupplyEmar.Dados", "WebsupplyEmar.Dados\WebsupplyEmar.Dados.csproj", "{9BC6D97C-14A8-4D42-BFAD-9889195310C8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{95561EA5-266E-4362-A39D-88FA0DF8609B} = {95561EA5-266E-4362-A39D-88FA0DF8609B}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebsupplyEmar.Dominio", "WebsupplyEmar.Dominio\WebsupplyEmar.Dominio.csproj", "{95561EA5-266E-4362-A39D-88FA0DF8609B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{90A471CC-2561-4ED8-9FC1-8CC0DA728B16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90A471CC-2561-4ED8-9FC1-8CC0DA728B16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90A471CC-2561-4ED8-9FC1-8CC0DA728B16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90A471CC-2561-4ED8-9FC1-8CC0DA728B16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BC6D97C-14A8-4D42-BFAD-9889195310C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BC6D97C-14A8-4D42-BFAD-9889195310C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BC6D97C-14A8-4D42-BFAD-9889195310C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BC6D97C-14A8-4D42-BFAD-9889195310C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95561EA5-266E-4362-A39D-88FA0DF8609B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95561EA5-266E-4362-A39D-88FA0DF8609B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95561EA5-266E-4362-A39D-88FA0DF8609B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95561EA5-266E-4362-A39D-88FA0DF8609B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4D580624-59A3-492C-B593-546391E631E0}
+	EndGlobalSection
+EndGlobal
