@@ -1,3 +1,3 @@
 # WebsupplyEmar
 
-Robô de Processamento de Anexos Enviados via E-Mail
+Email Reader - Robô de Processamento de Anexos Enviados via E-Mail
