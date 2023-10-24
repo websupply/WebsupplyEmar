@@ -1,6 +1,6 @@
 ﻿namespace WebsupplyEmar.API.Helpers
 {
-    public class FileHelper
+    public class ArquivoHelper
     {
         public static string ObterNomeUnico(string diretorio, string nomeOriginal)
         {

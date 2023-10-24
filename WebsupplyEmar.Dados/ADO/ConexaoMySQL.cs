@@ -8,13 +8,13 @@ using MySqlConnector;
 
 namespace WebsupplyEmar.Dados.ADO
 {
-    public class ConexaoADO
+    public class ConexaoMySQL
     {
         public MySqlConnection Con { get; set; }
         public string ErroConexao { get; set; }
 
 
-        public ConexaoADO(string Connection)
+        public ConexaoMySQL(string Connection)
         {
             try
             {

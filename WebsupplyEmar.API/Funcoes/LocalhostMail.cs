@@ -82,7 +82,7 @@ namespace WebsupplyEmar.API.Funcoes
                         if (match.Success)
                         {
                             string token = match.Groups[1].Value;
-                            objClaims = GeradorClaimsJWT.CarregaClaims(token);
+                            objClaims = GeradorClaimsJWT.CarregaToken(token);
                         }
                     }
 

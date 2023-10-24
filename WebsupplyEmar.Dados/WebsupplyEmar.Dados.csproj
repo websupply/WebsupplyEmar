@@ -11,4 +11,8 @@
     <PackageReference Include="MySqlConnector" Version="2.2.7" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WebsupplyEmar.Dominio\WebsupplyEmar.Dominio.csproj" />
+  </ItemGroup>
+
 </Project>
