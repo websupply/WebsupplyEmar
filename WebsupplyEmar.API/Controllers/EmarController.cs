@@ -166,7 +166,7 @@ namespace WebsupplyEmar.API.Controllers
             // Faz a Leitura dos E-Mails e também o processamento
             if (arrayEmails.Value.Count() > 0 )
             {
-                for(var i = 0;i < arrayEmails.Value.Count(); i++)
+                for (var i = 0;i < arrayEmails.Value.Count(); i++)
                 {
                     // Declara a Variavel de Email
                     var email = arrayEmails.Value[i];
