@@ -74,7 +74,12 @@ namespace WebsupplyEmar.Dados.ADO
             }
         }
 
-        public static bool GERA_LOG_PROCESSAMENTO(string Connection, string cCGC, string cCCUSTO, string cREQUISIT, string cGRAPH_EMAIL_ID, string cGRAPH_EMAIL_SUBJECT, string cGRAPH_EMAIL_SENDER_NAME, string cGRAPH_EMAIL_SENDER_EMAIL, string cGRAPH_EMAIL_BODY, string cGRAPH_EMAIL_HASATTACHMENTS, string cANEXO, string cTOKEN_JWT, string cTOKEN_JWT_DECRYPT, string cSTATUS)
+        public static bool GERA_LOG_PROCESSAMENTO(
+            string Connection, string cCGC, string cCCUSTO,
+            string cREQUISIT, string cGRAPH_EMAIL_ID, string cGRAPH_EMAIL_SUBJECT,
+            string cGRAPH_EMAIL_SENDER_NAME, string cGRAPH_EMAIL_SENDER_EMAIL, string cGRAPH_EMAIL_BODY,
+            string cGRAPH_EMAIL_HASATTACHMENTS, string cANEXO, string cTOKEN_JWT,
+            string cTOKEN_JWT_DECRYPT, string cSTATUS, string cDESCRICAO_LOG)
         {
             ConexaoSQLServer Conn = new ConexaoSQLServer(Connection);
 
@@ -94,6 +99,7 @@ namespace WebsupplyEmar.Dados.ADO
             parametros.Add(new SqlParameter("@cTOKEN_JWT", cTOKEN_JWT));
             parametros.Add(new SqlParameter("@cTOKEN_JWT_DECRYPT", cTOKEN_JWT_DECRYPT));
             parametros.Add(new SqlParameter("@cSTATUS", cSTATUS));
+            parametros.Add(new SqlParameter("@cDESCRICAO_LOG", cDESCRICAO_LOG));
 
             try
             {
@@ -163,6 +169,34 @@ namespace WebsupplyEmar.Dados.ADO
 
                 return false;
             }
+        }
+
+        public static string CONSULTA_JWT_EXISTENTE(string Connection, string cJWT)
+        {
+            ConexaoSQLServer Conn = new ConexaoSQLServer(Connection);
+
+            string NomeProcedure = "SP_EMAR_VALIDA_JWT";
+
+            List<SqlParameter> parametros = new List<SqlParameter>();
+            parametros.Add(new SqlParameter("@cJWT", cJWT));
+
+            string Valido = "S";
+
+            using (var reader = Conn.ExecutaComParametros(NomeProcedure, parametros))
+            {
+                while (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        Valido = String.IsNullOrEmpty(reader["Valido"].ToString()) ? "S" : reader["Valido"].ToString().Trim();
+                    }
+                    reader.NextResult();
+                }
+            }
+
+            Conn.Dispose();
+
+            return Valido;
         }
     }
 }
