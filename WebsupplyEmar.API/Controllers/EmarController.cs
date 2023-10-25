@@ -737,7 +737,11 @@ namespace WebsupplyEmar.API.Controllers
             }
 
             // Gera o Log de operação do Robô
-            LogMensagem = "Finalização do Processamento de Anexos via E-Mail";
+            LogMensagem = "Finalização do Processamento de Anexos via E-Mail - ";
+            LogMensagem += "Total de Emails Processados: "+emailsProcessados.Count()+", ";
+            LogMensagem += "Total de Emails Não Processados: " + emailsNaoProcessados.Count()+", ";
+            LogMensagem += "Total de Emails de Spam: " + emailsSpam.Count()+".";
+
             GeraLog = EmarADO.GERA_LOG(
                 _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
                 LogMensagem
