@@ -166,8 +166,11 @@ namespace WebsupplyEmar.API.Controllers
             // Faz a Leitura dos E-Mails e também o processamento
             if (arrayEmails.Value.Count() > 0 )
             {
-                foreach(var email in arrayEmails.Value)
+                for(var i = 0;i < arrayEmails.Value.Count(); i++)
                 {
+                    // Declara a Variavel de Email
+                    var email = arrayEmails.Value[i];
+
                     // Declara a variavel da pasta de destino
                     string pastaDestino = "";
 
@@ -209,37 +212,154 @@ namespace WebsupplyEmar.API.Controllers
                                             // Consulta os anexos
                                             var consultaAnexos = await ambienteGraph.Users[userMailId].MailFolders["inbox"].Messages[email.Id].Attachments.GetAsync();
 
-                                            foreach (FileAttachment anexo in consultaAnexos.Value)
+                                            // Define o parametro para caso o email contenha somente 1 anexo e
+                                            // este anexo faça parte da assinatura de email
+                                            bool AnexoAssinaturaEmail = false;
+                                            string NomeAnexoAssinaturaEmail = null;
+
+                                            for (var j = 0;j < consultaAnexos.Value.Count(); j++)
                                             {
-                                                // Consulta os dados do ambiente
-                                                EmarAmbienteResponseDto objEmarAmbiente = EmarADO.CONSULTA_AMBIENTE_ARQUIVOS(
-                                                    _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
-                                                    JWT_CLAIMS.CGCMatriz,
-                                                    ambiente,
-                                                    JWT_CLAIMS.TABELA
-                                                    );
+                                                // Define a variavel anexo
+                                                FileAttachment anexo = (FileAttachment)consultaAnexos.Value[j];
 
-                                                // Declara as variaveis de gestão do arquivo
-                                                string nomeOriginal = anexo.Name;
-                                                string diretorioDestino = objEmarAmbiente.DriverFisicoArquivos;
+                                                // Verifica se o anexo não faz parte da assinatura de email
+                                                if (!(bool)anexo.IsInline && anexo.ContentId == null)
+                                                {
+                                                    // Consulta os dados do ambiente
+                                                    EmarAmbienteResponseDto objEmarAmbiente = EmarADO.CONSULTA_AMBIENTE_ARQUIVOS(
+                                                        _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
+                                                        JWT_CLAIMS.CGCMatriz,
+                                                        ambiente,
+                                                        JWT_CLAIMS.TABELA
+                                                        );
 
-                                                // Verifica se a pasta existe, e caso não, cria a pasta
-                                                if (!Directory.Exists(diretorioDestino))
-                                                {
-                                                    Directory.CreateDirectory(diretorioDestino);
-                                                }
+                                                    // Declara as variaveis de gestão do arquivo
+                                                    string nomeOriginal = anexo.Name;
+                                                    string diretorioDestino = objEmarAmbiente.DriverFisicoArquivos;
 
-                                                // Adiciona a pasta de Codigo do pedido
-                                                if (JWT_CLAIMS.TABELA == "PedidosItens_Temp")
-                                                {
-                                                    diretorioDestino += "\\" + JWT_CLAIMS.CDGPED;
-                                                }
-                                                else if (JWT_CLAIMS.TABELA == "CL_PROCESSO_ANEXO")
-                                                {
-                                                    diretorioDestino += "\\" + JWT_CLAIMS.CL_CDG;
-                                                }
-                                                else
-                                                {
+                                                    // Verifica se a pasta existe, e caso não, cria a pasta
+                                                    if (!Directory.Exists(diretorioDestino))
+                                                    {
+                                                        Directory.CreateDirectory(diretorioDestino);
+                                                    }
+
+                                                    // Adiciona a pasta de Codigo do pedido
+                                                    if (JWT_CLAIMS.TABELA == "PedidosItens_Temp")
+                                                    {
+                                                        diretorioDestino += "\\" + JWT_CLAIMS.CDGPED;
+                                                    }
+                                                    else if (JWT_CLAIMS.TABELA == "CL_PROCESSO_ANEXO")
+                                                    {
+                                                        diretorioDestino += "\\" + JWT_CLAIMS.CL_CDG;
+                                                    }
+                                                    else
+                                                    {
+                                                        // Gera o Log de Processamento
+                                                        if (!EmarADO.GERA_LOG_PROCESSAMENTO(
+                                                            _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
+                                                            JWT_CLAIMS.CGC,
+                                                            JWT_CLAIMS.CCUSTO,
+                                                            JWT_CLAIMS.REQUISIT,
+                                                            email.Id,
+                                                            email.Subject,
+                                                            email.Sender.EmailAddress.Name,
+                                                            email.Sender.EmailAddress.Address,
+                                                            email.Body.Content,
+                                                            (bool)email.HasAttachments ? "S" : "N",
+                                                            nomeOriginal,
+                                                            jwtEmail,
+                                                            GeradorClaimsJWT.ConverteClaimsParaString(JWT_CLAIMS),
+                                                            "NP",
+                                                            "O Email não foi processado pois a Tabela enviada não existe"))
+                                                        {
+                                                            // Gera o Log de operação do Robô
+                                                            LogMensagem = "Não foi possível gerar o log de processamento do Email Processado pois a Tabela não existe";
+                                                            GeraLog = EmarADO.GERA_LOG(
+                                                                _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
+                                                                LogMensagem
+                                                                );
+
+                                                            // Retorna erro
+                                                            return APIResponseHelper.EstruturaResponse(
+                                                                "Ops",
+                                                                LogMensagem,
+                                                                "error",
+                                                                null,
+                                                                400,
+                                                                Url.Action("processar_emails", "Emar", null, Request.Scheme));
+                                                        }
+                                                    }
+
+                                                    // Verifica se a pasta do pedido existe, e caso não, cria a pasta
+                                                    if (!Directory.Exists(diretorioDestino))
+                                                    {
+                                                        Directory.CreateDirectory(diretorioDestino);
+                                                    }
+
+                                                    // Verifica se este arquivo ja existe e caso sim, gera um nome unico para este arquivo
+                                                    string nomeArquivoUnico = ArquivoHelper.ObterNomeUnico(diretorioDestino, nomeOriginal);
+
+                                                    // Seta o caminho completo de destino
+                                                    string caminhoDestino = Path.Combine(diretorioDestino, nomeArquivoUnico);
+
+                                                    // Salva o arquivo
+                                                    System.IO.File.WriteAllBytes(caminhoDestino, anexo.ContentBytes);
+
+                                                    // Realiza o registro do anexo no banco de dados
+                                                    if (JWT_CLAIMS.TABELA == "PedidosItens_Temp")
+                                                    {
+                                                        if (!EmarADO.PROCESSA_ANEXO_PEDIDOITENS(
+                                                            _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
+                                                            JWT_CLAIMS.CDGPED,
+                                                            nomeArquivoUnico,
+                                                            JWT_CLAIMS.CODPROD,
+                                                            JWT_CLAIMS.CODITEM,
+                                                            JWT_CLAIMS.CGCF))
+                                                        {
+                                                            // Gera o Log de operação do Robô
+                                                            LogMensagem = "O Serviço foi interrompido pois não foi possível salvar o arquivo no banco.";
+                                                            GeraLog = EmarADO.GERA_LOG(
+                                                                _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
+                                                                LogMensagem
+                                                                );
+
+                                                            // Retorna erro
+                                                            return APIResponseHelper.EstruturaResponse(
+                                                                "Ops",
+                                                                LogMensagem,
+                                                                "error",
+                                                                null,
+                                                                400,
+                                                                Url.Action("processar_emails", "Emar", null, Request.Scheme));
+                                                        }
+                                                    }
+                                                    else if (JWT_CLAIMS.TABELA == "CL_PROCESSO_ANEXO")
+                                                    {
+                                                        if (!EmarADO.PROCESSA_ANEXO_CL_PROCESSO_ANEXO(
+                                                            _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
+                                                            JWT_CLAIMS.CL_CDG,
+                                                            JWT_CLAIMS.TIPO,
+                                                            nomeArquivoUnico,
+                                                            JWT_CLAIMS.DISPONIVEL_FORNEC))
+                                                        {
+                                                            // Gera o Log de operação do Robô
+                                                            LogMensagem = "O Serviço foi interrompido pois não foi possível salvar o arquivo no banco.";
+                                                            GeraLog = EmarADO.GERA_LOG(
+                                                                _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
+                                                                LogMensagem
+                                                                );
+
+                                                            // Retorna erro
+                                                            return APIResponseHelper.EstruturaResponse(
+                                                                "Ops",
+                                                                LogMensagem,
+                                                                "error",
+                                                                null,
+                                                                400,
+                                                                Url.Action("processar_emails", "Emar", null, Request.Scheme));
+                                                        }
+                                                    }
+
                                                     // Gera o Log de Processamento
                                                     if (!EmarADO.GERA_LOG_PROCESSAMENTO(
                                                         _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
@@ -252,14 +372,14 @@ namespace WebsupplyEmar.API.Controllers
                                                         email.Sender.EmailAddress.Address,
                                                         email.Body.Content,
                                                         (bool)email.HasAttachments ? "S" : "N",
-                                                        nomeOriginal,
+                                                        nomeArquivoUnico,
                                                         jwtEmail,
                                                         GeradorClaimsJWT.ConverteClaimsParaString(JWT_CLAIMS),
-                                                        "NP",
-                                                        "O Email não foi processado pois a Tabela enviada não existe"))
+                                                        "PR",
+                                                        "O Email foi processado com sucesso"))
                                                     {
                                                         // Gera o Log de operação do Robô
-                                                        LogMensagem = "Não foi possível gerar o log de processamento do Email Processado pois a Tabela não existe";
+                                                        LogMensagem = "Não foi possível gerar o log de processamento do Email Processado";
                                                         GeraLog = EmarADO.GERA_LOG(
                                                             _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
                                                             LogMensagem
@@ -275,77 +395,17 @@ namespace WebsupplyEmar.API.Controllers
                                                             Url.Action("processar_emails", "Emar", null, Request.Scheme));
                                                     }
                                                 }
-
-                                                // Verifica se a pasta do pedido existe, e caso não, cria a pasta
-                                                if (!Directory.Exists(diretorioDestino))
+                                                else
                                                 {
-                                                    Directory.CreateDirectory(diretorioDestino);
+                                                    AnexoAssinaturaEmail = true;
+                                                    NomeAnexoAssinaturaEmail = anexo.Name;
                                                 }
+                                            }
 
-                                                // Verifica se este arquivo ja existe e caso sim, gera um nome unico para este arquivo
-                                                string nomeArquivoUnico = ArquivoHelper.ObterNomeUnico(diretorioDestino, nomeOriginal);
-
-                                                // Seta o caminho completo de destino
-                                                string caminhoDestino = Path.Combine(diretorioDestino, nomeArquivoUnico);
-
-                                                // Salva o arquivo
-                                                System.IO.File.WriteAllBytes(caminhoDestino, anexo.ContentBytes);
-
-                                                // Realiza o registro do anexo no banco de dados
-                                                if (JWT_CLAIMS.TABELA == "PedidosItens_Temp")
-                                                {
-                                                    if (!EmarADO.PROCESSA_ANEXO_PEDIDOITENS(
-                                                        _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
-                                                        JWT_CLAIMS.CDGPED,
-                                                        nomeArquivoUnico,
-                                                        JWT_CLAIMS.CODPROD,
-                                                        JWT_CLAIMS.CODITEM,
-                                                        JWT_CLAIMS.CGCF))
-                                                    {
-                                                        // Gera o Log de operação do Robô
-                                                        LogMensagem = "O Serviço foi interrompido pois não foi possível salvar o arquivo no banco.";
-                                                        GeraLog = EmarADO.GERA_LOG(
-                                                            _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
-                                                            LogMensagem
-                                                            );
-
-                                                        // Retorna erro
-                                                        return APIResponseHelper.EstruturaResponse(
-                                                            "Ops",
-                                                            LogMensagem,
-                                                            "error",
-                                                            null,
-                                                            400,
-                                                            Url.Action("processar_emails", "Emar", null, Request.Scheme));
-                                                    }
-                                                }
-                                                else if (JWT_CLAIMS.TABELA == "CL_PROCESSO_ANEXO")
-                                                {
-                                                    if (!EmarADO.PROCESSA_ANEXO_CL_PROCESSO_ANEXO(
-                                                        _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
-                                                        JWT_CLAIMS.CL_CDG,
-                                                        JWT_CLAIMS.TIPO,
-                                                        nomeArquivoUnico,
-                                                        JWT_CLAIMS.DISPONIVEL_FORNEC))
-                                                    {
-                                                        // Gera o Log de operação do Robô
-                                                        LogMensagem = "O Serviço foi interrompido pois não foi possível salvar o arquivo no banco.";
-                                                        GeraLog = EmarADO.GERA_LOG(
-                                                            _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
-                                                            LogMensagem
-                                                            );
-
-                                                        // Retorna erro
-                                                        return APIResponseHelper.EstruturaResponse(
-                                                            "Ops",
-                                                            LogMensagem,
-                                                            "error",
-                                                            null,
-                                                            400,
-                                                            Url.Action("processar_emails", "Emar", null, Request.Scheme));
-                                                    }
-                                                }
-
+                                            // Verifica se houve somente um anexo, e se este anexo é valido
+                                            // ou se faz parte da assinatura de email
+                                            if(consultaAnexos.Value.Count() == 1 && AnexoAssinaturaEmail)
+                                            {
                                                 // Gera o Log de Processamento
                                                 if (!EmarADO.GERA_LOG_PROCESSAMENTO(
                                                     _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
@@ -358,14 +418,14 @@ namespace WebsupplyEmar.API.Controllers
                                                     email.Sender.EmailAddress.Address,
                                                     email.Body.Content,
                                                     (bool)email.HasAttachments ? "S" : "N",
-                                                    nomeArquivoUnico,
+                                                    NomeAnexoAssinaturaEmail,
                                                     jwtEmail,
                                                     GeradorClaimsJWT.ConverteClaimsParaString(JWT_CLAIMS),
-                                                    "PR",
-                                                    "O Email foi processado com sucesso"))
+                                                    "NP",
+                                                    "O Email não foi processado pois o anexo foi identificado como parte da assinatura do Email"))
                                                 {
                                                     // Gera o Log de operação do Robô
-                                                    LogMensagem = "Não foi possível gerar o log de processamento do Email Processado";
+                                                    LogMensagem = "Não foi possível gerar o log de processamento do Email com Anexo referente a assinatura do Email";
                                                     GeraLog = EmarADO.GERA_LOG(
                                                         _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
                                                         LogMensagem
@@ -380,13 +440,21 @@ namespace WebsupplyEmar.API.Controllers
                                                         400,
                                                         Url.Action("processar_emails", "Emar", null, Request.Scheme));
                                                 }
+
+                                                // Seta a pasta de destino
+                                                pastaDestino = _configuration.GetValue<string>("EmarWebsupplyWeb:UnprocessedFolder");
+
+                                                // Adiciona o email processado a array
+                                                emailsNaoProcessados.Add(email);
                                             }
+                                            else
+                                            {
+                                                // Seta a pasta de destino
+                                                pastaDestino = _configuration.GetValue<string>("EmarWebsupplyWeb:ProcessFolder");
 
-                                            // Seta a pasta de destino
-                                            pastaDestino = _configuration.GetValue<string>("EmarWebsupplyWeb:ProcessFolder");
-
-                                            // Adiciona o email processado a array
-                                            emailsProcessados.Add(email);
+                                                // Adiciona o email processado a array
+                                                emailsProcessados.Add(email);
+                                            }
                                         }
                                         else
                                         {
