@@ -35,6 +35,7 @@ namespace WebsupplyEmar.Dados.ADO
                     {
                         resultEmarAmbiente.COD_AMBIENTE_ARQUIVOS = (int)reader["COD_AMBIENTE_ARQUIVOS"];
                         resultEmarAmbiente.CGCMatriz = String.IsNullOrEmpty(reader["CGCMatriz"].ToString()) ? "" : reader["CGCMatriz"].ToString().Trim();
+                        resultEmarAmbiente.Empresa = String.IsNullOrEmpty(reader["Empresa"].ToString()) ? "" : reader["Empresa"].ToString().Trim();
                         resultEmarAmbiente.Ambiente = String.IsNullOrEmpty(reader["Ambiente"].ToString()) ? "" : reader["Ambiente"].ToString().Trim();
                         resultEmarAmbiente.DriverFisicoArquivos = String.IsNullOrEmpty(reader["DriverFisicoArquivos"].ToString()) ? "" : reader["DriverFisicoArquivos"].ToString().Trim();
                         resultEmarAmbiente.DATAHORARIO_CADASTRO = (DateTime)reader["DATAHORARIO_CADASTRO"];

@@ -1,4 +1,6 @@
-﻿namespace WebsupplyEmar.API.Helpers
+﻿using Microsoft.Graph.Models;
+
+namespace WebsupplyEmar.API.Helpers
 {
     public class ArquivoHelper
     {
@@ -16,6 +18,23 @@
             }
 
             return nomeUnico;
+        }
+
+        public static int ContabilizaAnexosValidos(List<Attachment> Anexos)
+        {
+            int arquivosValidos = 0;
+
+            for(int i = 0;i < Anexos.Count(); i++)
+            {
+                FileAttachment Anexo = (FileAttachment)Anexos[i];
+
+                if(!(bool)Anexo.IsInline && Anexo.ContentId == null)
+                {
+                    arquivosValidos++;
+                }
+            }
+
+            return arquivosValidos;
         }
     }
 }

@@ -10,6 +10,7 @@ namespace WebsupplyEmar.Dominio.Dto
     {
         public int COD_AMBIENTE_ARQUIVOS { get; set; }
         public string CGCMatriz { get; set; }
+        public string Empresa { get; set; }
         public string Ambiente { get; set; }
         public string DriverFisicoArquivos { get; set; }
         public DateTime DATAHORARIO_CADASTRO { get; set; }
