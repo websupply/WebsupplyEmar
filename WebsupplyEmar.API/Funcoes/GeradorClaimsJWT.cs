@@ -1,6 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using System.Dynamic;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
@@ -146,9 +147,9 @@ namespace WebsupplyEmar.API.Funcoes
                 if (claim.Type == "TIPO")
                     objClaim.TIPO = claim.Value;
                 if (claim.Type == "DT_CRIACAO")
-                    objClaim.DT_CRIACAO = DateTime.Parse(claim.Value);
+                    objClaim.DT_CRIACAO = DateTime.Parse(claim.Value, CultureInfo.InvariantCulture);
                 if (claim.Type == "DT_EXPIRACAO")
-                    objClaim.DT_EXPIRACAO = DateTime.Parse(claim.Value);
+                    objClaim.DT_EXPIRACAO = DateTime.Parse(claim.Value, CultureInfo.InvariantCulture);
             }
 
             return objClaim;
