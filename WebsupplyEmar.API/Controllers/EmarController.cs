@@ -44,6 +44,8 @@ namespace WebsupplyEmar.API.Controllers
 
             // Cria o Token
             string Token = geradorClaimsJWT.CriaToken(objClaimsRequest);
+
+            // Cria a Claims
             ClaimsModel JWT_CLAIMS = GeradorClaimsJWT.CarregaToken(Token);
 
             // Gera o retorno
