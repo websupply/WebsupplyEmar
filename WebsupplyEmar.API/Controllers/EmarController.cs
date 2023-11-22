@@ -42,10 +42,16 @@ namespace WebsupplyEmar.API.Controllers
                                 _configuration.GetValue<int>("JWT:TokenValidityInMinutes"),
                                 _configuration.GetValue<int>("JWT:RefreshTokenValidityInMinutes"));
 
+            // Cria o Token
+            string Token = geradorClaimsJWT.CriaToken(objClaimsRequest);
+            ClaimsModel JWT_CLAIMS = GeradorClaimsJWT.CarregaToken(Token);
+
             // Gera o retorno
             object Retorno = new
             {
-                Token = "["+geradorClaimsJWT.CriaToken(objClaimsRequest)+"]"
+                Token = "[" + Token + "]",
+                DT_CRIACAO = JWT_CLAIMS.DT_CRIACAO,
+                DT_EXPIRACAO = JWT_CLAIMS.DT_EXPIRACAO
             };
 
             // Retorna a consulta
