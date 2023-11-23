@@ -13,7 +13,7 @@ namespace WebsupplyEmar.API.Helpers
 
             while (File.Exists(Path.Combine(diretorio, nomeUnico)))
             {
-                nomeUnico = $"{nomeBase} (cópia {contador}){extensao}";
+                nomeUnico = $"{nomeBase}_copia_{contador}{extensao}";
                 contador++;
             }
 
