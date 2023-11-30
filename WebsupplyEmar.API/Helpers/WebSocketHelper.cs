@@ -58,13 +58,18 @@ namespace WebsupplyEmar.API.Helpers
             {
                 try
                 {
-                    WebSocketClass socket = WebSockets.Find(find => find.Chave == Chave);
-
-                    if (socket != null)
+                    foreach (var socket in WebSockets)
                     {
-                        if (socket.Conector.State == WebSocketState.Open && Sevidor == socket.Servidor)
+                        try
                         {
-                            await socket.Conector.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                            if (socket.Conector.State == WebSocketState.Open && Sevidor == socket.Servidor && Chave == socket.Chave)
+                            {
+                                await socket.Conector.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                            }
+                        }
+                        catch (WebSocketException ex)
+                        {
+                            Console.WriteLine($"Exceção gerada do WebSocket: {ex.Message}");
                         }
                     }
                 }
@@ -160,7 +165,7 @@ namespace WebsupplyEmar.API.Helpers
                         && find.Host == newWebSocket.Host) == null) {
                     WebSockets.Add(newWebSocket);
 
-                    Console.WriteLine($"Conexão Iniciado no WebSocket por --- {Servidor}");
+                    Console.WriteLine($"Conexão Iniciado no WebSocket ({Servidor}) por --- {newWebSocket.Host}");
                 };
             }
 
@@ -178,21 +183,17 @@ namespace WebsupplyEmar.API.Helpers
 
                         Console.WriteLine($"Mensagem Recebida de {Servidor}: {Mensagem}");
 
-                        ProcessaMensagem(Servidor, Mensagem, null);
+                        ProcessaMensagem(Servidor, Mensagem, context.Request.QueryString["Chave"]);
                     }
                     else if (result.MessageType == WebSocketMessageType.Close)
                     {
-                        Console.WriteLine($"Conexão Encerrada pelo Cliente --- {context.Request.UserHostName}");
+                        Console.WriteLine($"Conexão Encerrada pelo Cliente --- {context.Request.RemoteEndPoint}");
 
                         webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Conexão Encerrada pelo Cliente", CancellationToken.None);
 
                         lock (objFechado)
                         {
-                            WebSockets.Remove(new WebSocketClass
-                            {
-                                Servidor = Servidor,
-                                Conector = webSocket
-                            });
+                            WebSockets.Remove(WebSockets.Find(websocket => websocket.Host == context.Request.RemoteEndPoint.ToString()));
                         }
                     }
                 }
@@ -209,11 +210,7 @@ namespace WebsupplyEmar.API.Helpers
 
                     lock (objFechado)
                     {
-                        WebSockets.Remove(new WebSocketClass
-                        {
-                            Servidor = Servidor,
-                            Conector = webSocket
-                        });
+                        WebSockets.Remove(WebSockets.Find(websocket => websocket.Host == context.Request.RemoteEndPoint.ToString()));
                     }
                 }
             }
