@@ -1,33 +1,34 @@
 ﻿using System.Net.WebSockets;
 using System.Net;
 using System.Text;
+using System.Net.Sockets;
 
 namespace WebsupplyEmar.API.Helpers
 {
     public class WebSocketClass
     {
+        public string Chave { get; set; }
         public string Servidor { get; set; }
-        public WebSocket webSocket { get; set; }
+        public string Host { get; set; }
+        public WebSocket Conector { get; set; }
     }
 
     public class WebSocketHelper
     {
-        private static Dictionary<string, HttpListener> httpListeners = new Dictionary<string, HttpListener>();
+        private static Dictionary<string, HttpListener> Servidores = new Dictionary<string, HttpListener>();
         private static List<WebSocketClass> WebSockets = new List<WebSocketClass>();
         private static List<string> Mensagens = new List<string>();
         private static readonly object objFechado = new object();
 
         // Delegate para o callback
-        public delegate void MessageReceivedCallback(string message);
+        public delegate void MensagemRecebidaCallback(string message);
 
         // Evento para notificar sobre a chegada de mensagens específicas
-        public event MessageReceivedCallback OnSpecificMessageReceived;
+        public event MensagemRecebidaCallback OnMensagemEspecificaRecebida;
 
         // Função para Processar a Mensagem do WebSocket
-        private async Task ProcessaMensagem(WebSocket webSocket, ArraySegment<byte> buffer, CancellationToken cancellationToken)
-        {
-            string Mensagem = Encoding.UTF8.GetString(buffer.Array, 0, buffer.Count).Replace("\0", "");
-            
+        private async Task ProcessaMensagem(string Servidor, string Mensagem, string Chave)
+        {            
             // Adicione a mensagem à lista de mensagens
             lock (objFechado)
             {
@@ -38,33 +39,56 @@ namespace WebsupplyEmar.API.Helpers
             if (Mensagem == "Tretas")
             {
                 // Chame o callback para a mensagem específica
-                OnSpecificMessageReceived?.Invoke(Mensagem);
+                OnMensagemEspecificaRecebida?.Invoke(Mensagem);
             }
 
             // Envie a mensagem para todos os clientes conectados
-            await TransmitirMensangem(Mensagem);
+            await TransmitirMensangem(Servidor, Mensagem, Chave);
 
             // Example: Echo the received message back to the client
             //await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken);
         }
 
-        private async Task TransmitirMensangem(string message)
+        private async Task TransmitirMensangem(string Sevidor, string Mensagem, string Chave)
         {
-            byte[] buffer = Encoding.UTF8.GetBytes(message);
+            byte[] buffer = Encoding.UTF8.GetBytes(Mensagem);
 
-            // Envie a mensagem para todos os clientes conectados
-            foreach (var socket in WebSockets)
+            // Verifica se irá mandar mensagem somente para um cliente
+            if(Chave != null)
             {
                 try
                 {
-                    if (socket.webSocket.State == WebSocketState.Open)
+                    WebSocketClass socket = WebSockets.Find(find => find.Chave == Chave);
+
+                    if (socket != null)
                     {
-                        await socket.webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                        if (socket.Conector.State == WebSocketState.Open && Sevidor == socket.Servidor)
+                        {
+                            await socket.Conector.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                        }
                     }
                 }
                 catch (WebSocketException ex)
                 {
                     Console.WriteLine($"Exceção gerada do WebSocket: {ex.Message}");
+                }
+            }
+            // Envie a mensagem para todos os clientes conectados
+            else
+            {
+                foreach (var socket in WebSockets)
+                {
+                    try
+                    {
+                        if (socket.Conector.State == WebSocketState.Open && Sevidor == socket.Servidor)
+                        {
+                            await socket.Conector.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                        }
+                    }
+                    catch (WebSocketException ex)
+                    {
+                        Console.WriteLine($"Exceção gerada do WebSocket: {ex.Message}");
+                    }
                 }
             }
         }
@@ -76,7 +100,7 @@ namespace WebsupplyEmar.API.Helpers
                 HttpListener httpListener;
 
                 // Verifica se já existe o servidor em andamento
-                if (httpListeners.TryGetValue(Servidor, out httpListener))
+                if (Servidores.TryGetValue(Servidor, out httpListener))
                 {
                     Console.WriteLine($"Não foi possível iniciar o servidor {Servidor}, pois o mesmo já está em execução.");
                     return false;
@@ -88,7 +112,7 @@ namespace WebsupplyEmar.API.Helpers
                 httpListener.Start();
 
                 // Armazena a listagem de servidores ativos
-                httpListeners[Servidor] = httpListener;
+                Servidores[Servidor] = httpListener;
 
                 Console.WriteLine($"Servidor WebSocket iniciado em --- {Servidor}");
 
@@ -123,13 +147,22 @@ namespace WebsupplyEmar.API.Helpers
 
             lock (objFechado)
             {
-                WebSockets.Add(new WebSocketClass {
+                WebSocketClass newWebSocket = new WebSocketClass
+                {
+                    Chave = context.Request.QueryString["Chave"] != null ? context.Request.QueryString["Chave"] : Guid.NewGuid().ToString(),
+                    Host = context.Request.RemoteEndPoint.ToString(),
                     Servidor = Servidor,
-                    webSocket = webSocket
-                });
-            }
+                    Conector = webSocket
+                };
 
-            Console.WriteLine($"Conexão Iniciado no WebSocket por --- {Servidor}");
+                if (WebSockets.Find(find => find.Chave == newWebSocket.Chave
+                        && find.Servidor == newWebSocket.Servidor
+                        && find.Host == newWebSocket.Host) == null) {
+                    WebSockets.Add(newWebSocket);
+
+                    Console.WriteLine($"Conexão Iniciado no WebSocket por --- {Servidor}");
+                };
+            }
 
             try
             {
@@ -141,11 +174,11 @@ namespace WebsupplyEmar.API.Helpers
 
                     if (result.MessageType == WebSocketMessageType.Text)
                     {
-                        string message = Encoding.UTF8.GetString(buffer.Array, 0, result.Count);
+                        string Mensagem = Encoding.UTF8.GetString(buffer.Array, 0, result.Count).Replace("\0", "");
 
-                        Console.WriteLine($"Mensagem Recebida de {Servidor}: {message}");
+                        Console.WriteLine($"Mensagem Recebida de {Servidor}: {Mensagem}");
 
-                        ProcessaMensagem(webSocket, buffer, CancellationToken.None);
+                        ProcessaMensagem(Servidor, Mensagem, null);
                     }
                     else if (result.MessageType == WebSocketMessageType.Close)
                     {
@@ -158,7 +191,7 @@ namespace WebsupplyEmar.API.Helpers
                             WebSockets.Remove(new WebSocketClass
                             {
                                 Servidor = Servidor,
-                                webSocket = webSocket
+                                Conector = webSocket
                             });
                         }
                     }
@@ -179,7 +212,7 @@ namespace WebsupplyEmar.API.Helpers
                         WebSockets.Remove(new WebSocketClass
                         {
                             Servidor = Servidor,
-                            webSocket = webSocket
+                            Conector = webSocket
                         });
                     }
                 }
@@ -193,7 +226,7 @@ namespace WebsupplyEmar.API.Helpers
                 HttpListener httpListener;
 
                 // Consulta o Servidor
-                if (!httpListeners.TryGetValue(Servidor, out httpListener))
+                if (!Servidores.TryGetValue(Servidor, out httpListener))
                 {
                     Console.WriteLine($"Não foi possível localizar o servidor {Servidor}.");
                     return false;
@@ -201,9 +234,9 @@ namespace WebsupplyEmar.API.Helpers
 
                 // Fecha o Servidor
                 httpListener.Close();
-                
+
                 // Remove o Servidor da Lista
-                httpListeners.Remove(Servidor);
+                Servidores.Remove(Servidor);
 
                 // Limpa os WebSockets conectados do server
                 lock(objFechado)
@@ -212,7 +245,7 @@ namespace WebsupplyEmar.API.Helpers
                     {
                         if(socket.Servidor == Servidor)
                         {
-                            socket.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, $"Conexão com o Servidor {Servidor} encerrada", CancellationToken.None);
+                            socket.Conector.CloseAsync(WebSocketCloseStatus.NormalClosure, $"Conexão com o Servidor {Servidor} encerrada", CancellationToken.None);
                             WebSockets.Remove(socket);
                         }
                     }

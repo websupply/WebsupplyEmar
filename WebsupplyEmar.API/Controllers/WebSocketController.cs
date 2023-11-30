@@ -14,7 +14,7 @@ namespace WebsupplyEmar.API.Controllers
             _webSocketHelper = webSocketHelper;
 
             // Assinar o evento OnSpecificMessageReceived
-            _webSocketHelper.OnSpecificMessageReceived += (message) =>
+            _webSocketHelper.OnMensagemEspecificaRecebida += (message) =>
             {
                 Console.WriteLine($"Mensagem Específica Recebida: {message}");
 
