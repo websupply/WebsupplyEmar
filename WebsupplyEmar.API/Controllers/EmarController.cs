@@ -196,17 +196,17 @@ namespace WebsupplyEmar.API.Controllers
                         {
                             string jwtEmail = match.Groups[1].Value;
 
-                            // Valida se jwt enviado ja existe na base de dados
-                            string ValidaJWTExistente = EmarADO.CONSULTA_JWT_EXISTENTE(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), jwtEmail);
-
-                            if(ValidaJWTExistente == "S")
-                            {
-                                // Valida se o Token é valido
-                                if (GeradorClaimsJWT.ValidaToken(
+                            // Valida se o Token é valido
+                            if (GeradorClaimsJWT.ValidaToken(
                                     jwtEmail,
                                     _configuration.GetValue<string>("JWT:SecretKey"),
                                     _configuration.GetValue<string>("JWT:ValidIssuer"),
                                     _configuration.GetValue<string>("JWT:ValidAudience")))
+                            {
+                                // Valida se jwt enviado ja existe na base de dados
+                                string ValidaJWTExistente = EmarADO.CONSULTA_JWT_EXISTENTE(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), jwtEmail);
+
+                                if (ValidaJWTExistente == "S")
                                 {
                                     // Converte o JWT em Claims
                                     ClaimsModel JWT_CLAIMS = GeradorClaimsJWT.CarregaToken(jwtEmail);
@@ -629,7 +629,7 @@ namespace WebsupplyEmar.API.Controllers
                                         jwtEmail,
                                         null,
                                         "NP",
-                                        "O Email não foi processado pois o Token está inválido"))
+                                        "O Email não foi processado pois o Token enviado já foi utilizado anteriormente"))
                                     {
                                         // Gera o Log de operação do Robô
                                         LogMensagem = "Não foi possível gerar o log de processamento do Email com Token Inválido";
@@ -673,7 +673,7 @@ namespace WebsupplyEmar.API.Controllers
                                     jwtEmail,
                                     null,
                                     "NP",
-                                    "O Email não foi processado pois o Token enviado já foi utilizado anteriormente"))
+                                    "O Email não foi processado pois o Token está inválido"))
                                 {
                                     // Gera o Log de operação do Robô
                                     LogMensagem = "Não foi possível gerar o log de processamento do Email pois o Token já foi utilizado na base de dados";
