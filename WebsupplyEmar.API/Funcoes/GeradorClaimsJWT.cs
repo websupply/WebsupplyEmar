@@ -179,6 +179,11 @@ namespace WebsupplyEmar.API.Funcoes
             {
                 return false;
             }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Erro ao validar o token: {ex.Message}");
+                return false;
+            }
         }
 
         public static string ConverteClaimsParaString(ClaimsModel objClaims)
