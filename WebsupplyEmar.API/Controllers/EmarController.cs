@@ -233,8 +233,13 @@ namespace WebsupplyEmar.API.Controllers
                                                 JWT_CLAIMS.TABELA
                                                 );
 
-                                            // !!!!!!!!!!!!!!!!!!!!Depois precisa rever esse parametro para consultar no banco
+                                            // Define os multiplos anexos como S somente para a cotação
                                             string MultiplosAnexos = "N";
+
+                                            if(JWT_CLAIMS.TABELA == "CL_PROCESSO_ANEXO")
+                                            {
+                                                MultiplosAnexos = "S";
+                                            }
 
                                             // Contabiliza o total de anexos validos
                                             int AnexosValidos = ArquivoHelper.ContabilizaAnexosValidos(consultaAnexos.Value);
