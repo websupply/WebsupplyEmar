@@ -7,11 +7,16 @@ namespace WebsupplyEmar.API.Controllers
     [ApiController]
     public class WebSocketController : Controller
     {
+        private readonly IConfiguration _configuration;
         private readonly WebSocketHelper _webSocketHelper;
 
-        public WebSocketController(WebSocketHelper webSocketHelper)
+        public WebSocketController(WebSocketHelper webSocketHelper, IConfiguration configuration)
         {
             _webSocketHelper = webSocketHelper;
+            _configuration = configuration;
+
+            // Define a string de Conexão com o Banco para Gerar os Logs
+            _webSocketHelper.DefineConexaoBD(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"));
 
             // Assinar o evento OnSpecificMessageReceived
             _webSocketHelper.OnMensagemEspecificaRecebida += (message) =>
@@ -25,6 +30,7 @@ namespace WebsupplyEmar.API.Controllers
         [HttpGet("inicia_servidor")]
         public async Task<IActionResult> IniciaServidor(string Servidor)
         {
+
             bool success = await _webSocketHelper.IniciaServidor(Servidor);
 
             if (success)

@@ -2,6 +2,9 @@
 using System.Net;
 using System.Text;
 using System.Net.Sockets;
+using WebsupplyEmar.Dados.ADO;
+using System.Net.NetworkInformation;
+using Microsoft.Graph.Models;
 
 namespace WebsupplyEmar.API.Helpers
 {
@@ -19,6 +22,13 @@ namespace WebsupplyEmar.API.Helpers
         private static List<WebSocketClass> WebSockets = new List<WebSocketClass>();
         private static List<string> Mensagens = new List<string>();
         private static readonly object objFechado = new object();
+        private static bool LogGerado;
+        private static string Connection;
+
+        public void DefineConexaoBD(string connection)
+        {
+            Connection = connection;
+        }
 
         // Delegate para o callback
         public delegate void MensagemRecebidaCallback(string message);
@@ -69,12 +79,14 @@ namespace WebsupplyEmar.API.Helpers
                         }
                         catch (WebSocketException ex)
                         {
+                            WebSocketADO.GERA_LOG(Connection, $"Exceção gerada do WebSocket: {ex.Message}");
                             Console.WriteLine($"Exceção gerada do WebSocket: {ex.Message}");
                         }
                     }
                 }
                 catch (WebSocketException ex)
                 {
+                    WebSocketADO.GERA_LOG(Connection, $"Exceção gerada do WebSocket: {ex.Message}");
                     Console.WriteLine($"Exceção gerada do WebSocket: {ex.Message}");
                 }
             }
@@ -92,6 +104,7 @@ namespace WebsupplyEmar.API.Helpers
                     }
                     catch (WebSocketException ex)
                     {
+                        WebSocketADO.GERA_LOG(Connection, $"Exceção gerada do WebSocket: {ex.Message}");
                         Console.WriteLine($"Exceção gerada do WebSocket: {ex.Message}");
                     }
                 }
@@ -107,6 +120,7 @@ namespace WebsupplyEmar.API.Helpers
                 // Verifica se já existe o servidor em andamento
                 if (Servidores.TryGetValue(Servidor, out httpListener))
                 {
+                    WebSocketADO.GERA_LOG(Connection, $"Não foi possível iniciar o servidor {Servidor}, pois o mesmo já está em execução.");
                     Console.WriteLine($"Não foi possível iniciar o servidor {Servidor}, pois o mesmo já está em execução.");
                     return false;
                 }
@@ -119,6 +133,7 @@ namespace WebsupplyEmar.API.Helpers
                 // Armazena a listagem de servidores ativos
                 Servidores[Servidor] = httpListener;
 
+                WebSocketADO.GERA_LOG(Connection, $"Servidor WebSocket iniciado em --- {Servidor}");
                 Console.WriteLine($"Servidor WebSocket iniciado em --- {Servidor}");
 
                 while (true)
@@ -137,6 +152,7 @@ namespace WebsupplyEmar.API.Helpers
             }
             catch (Exception ex)
             {
+                WebSocketADO.GERA_LOG(Connection, $"Exceção gerada no servidor WebSocket: {ex.Message}");
                 Console.WriteLine($"Exceção gerada no servidor WebSocket: {ex.Message}");
                 return false;
             }
@@ -165,6 +181,7 @@ namespace WebsupplyEmar.API.Helpers
                         && find.Host == newWebSocket.Host) == null) {
                     WebSockets.Add(newWebSocket);
 
+                    WebSocketADO.GERA_LOG(Connection, $"Conexão Iniciado no WebSocket ({Servidor}) por --- {newWebSocket.Host}");
                     Console.WriteLine($"Conexão Iniciado no WebSocket ({Servidor}) por --- {newWebSocket.Host}");
                 };
             }
@@ -181,12 +198,14 @@ namespace WebsupplyEmar.API.Helpers
                     {
                         string Mensagem = Encoding.UTF8.GetString(buffer.Array, 0, result.Count).Replace("\0", "");
 
+                        WebSocketADO.GERA_LOG(Connection, $"Mensagem Recebida de {Servidor}: {Mensagem}");
                         Console.WriteLine($"Mensagem Recebida de {Servidor}: {Mensagem}");
 
                         ProcessaMensagem(Servidor, Mensagem, context.Request.QueryString["Chave"]);
                     }
                     else if (result.MessageType == WebSocketMessageType.Close)
                     {
+                        WebSocketADO.GERA_LOG(Connection, $"Conexão Encerrada pelo Cliente --- {context.Request.RemoteEndPoint}");
                         Console.WriteLine($"Conexão Encerrada pelo Cliente --- {context.Request.RemoteEndPoint}");
 
                         webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Conexão Encerrada pelo Cliente", CancellationToken.None);
@@ -200,6 +219,7 @@ namespace WebsupplyEmar.API.Helpers
             }
             catch (WebSocketException ex)
             {
+                WebSocketADO.GERA_LOG(Connection, $"Exceção gerada no WebSocket --- {Servidor}: {ex.Message}");
                 Console.WriteLine($"Exceção gerada no WebSocket --- {Servidor}: {ex.Message}");
             }
             finally
@@ -225,6 +245,7 @@ namespace WebsupplyEmar.API.Helpers
                 // Consulta o Servidor
                 if (!Servidores.TryGetValue(Servidor, out httpListener))
                 {
+                    WebSocketADO.GERA_LOG(Connection, $"Não foi possível localizar o servidor {Servidor}.");
                     Console.WriteLine($"Não foi possível localizar o servidor {Servidor}.");
                     return false;
                 }
@@ -249,12 +270,14 @@ namespace WebsupplyEmar.API.Helpers
                 }
 
                 // Exibe a mensagem
+                WebSocketADO.GERA_LOG(Connection, $"Servidor {Servidor} parado com sucesso.");
                 Console.WriteLine($"Servidor {Servidor} parado com sucesso.");
 
                 return true;
             }
             catch (Exception ex)
             {
+                WebSocketADO.GERA_LOG(Connection, $"Exceção gerada ao tentar encerrar o servidor WebSocket: {ex.Message}");
                 Console.WriteLine($"Exceção gerada ao tentar encerrar o servidor WebSocket: {ex.Message}");
                 return false;
             }
