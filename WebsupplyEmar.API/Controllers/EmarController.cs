@@ -13,6 +13,9 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using WebsupplyEmar.Dominio.Model;
+using System.Net.WebSockets;
+using System.Text;
+using System.Text.Json;
 
 namespace WebsupplyEmar.API.Controllers
 {
@@ -125,6 +128,14 @@ namespace WebsupplyEmar.API.Controllers
             string LogMensagem = "";
             bool GeraLog = false;
 
+            // Declara a model que gerencia o log para envio via websocket
+            EmarLogProcessamentoModel logProcessamentoModel = new EmarLogProcessamentoModel();
+
+            // Declara as variaveis responsáveis pela estrutura do websocket
+            Uri webSocketUri;
+            ClientWebSocket webSocketCliente;
+            bool webSocketMensagemEnviada = false;
+
             // Gera o Log de operação do Robô
             LogMensagem = "Inicialização do Processamento de Anexos via E-Mail";
             GeraLog = EmarADO.GERA_LOG(
@@ -194,7 +205,17 @@ namespace WebsupplyEmar.API.Controllers
                         // Caso exista token, prossegue e caso não, direciona para não processados.
                         if (match.Success)
                         {
+                            // Extrai o Jwt
                             string jwtEmail = match.Groups[1].Value;
+
+                            // Define a Uri do WebSocket
+                            webSocketUri = new Uri(_configuration.GetValue<string>("WebSockets:URI") + ":" + _configuration.GetValue<string>("WebSockets:Porta") + "/?Chave=" + jwtEmail);
+                            
+                            // Define o Cliente do WebSocket
+                            webSocketCliente = new ClientWebSocket();
+
+                            // Realiza a Conexão com o Servidor WebSocket
+                            webSocketCliente.ConnectAsync(webSocketUri, CancellationToken.None).Wait();
 
                             // Valida se o Token é valido
                             if (GeradorClaimsJWT.ValidaToken(
@@ -247,6 +268,14 @@ namespace WebsupplyEmar.API.Controllers
                                             // Verifica se o Ambiente Permite Multiplos Anexos e caso não e tenha mais de 1 anexo, ja move o email para não processados
                                             if (MultiplosAnexos == "N" && AnexosValidos > 1)
                                             {
+                                                // Estrutura o log do Robô
+                                                logProcessamentoModel.Data = DateTime.Now.ToString();
+                                                logProcessamentoModel.Status = "NP";
+                                                logProcessamentoModel.Descricao = "O Email não foi processado pois o ambiente de upload não permite múltiplos anexos";
+
+                                                // Envia a Mensagem e ja encerra a conexão com o websocket
+                                                webSocketMensagemEnviada = EmarHelper.EnviaMensagemWebSocket(logProcessamentoModel, webSocketCliente, true);
+
                                                 // Gera o Log de Processamento
                                                 if (!EmarADO.GERA_LOG_PROCESSAMENTO(
                                                     _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
@@ -262,8 +291,8 @@ namespace WebsupplyEmar.API.Controllers
                                                     NomeAnexoAssinaturaEmail,
                                                     jwtEmail,
                                                     GeradorClaimsJWT.ConverteClaimsParaString(JWT_CLAIMS),
-                                                    "NP",
-                                                    "O Email não foi processado pois o ambiente de upload não permite múltiplos anexos"))
+                                                    logProcessamentoModel.Status,
+                                                    logProcessamentoModel.Descricao))
                                                 {
                                                     // Gera o Log de operação do Robô
                                                     LogMensagem = "Não foi possível gerar o log de processamento do Email onde o ambiente de upload não permite múltiplos anexos";
@@ -319,6 +348,14 @@ namespace WebsupplyEmar.API.Controllers
                                                         }
                                                         else
                                                         {
+                                                            // Estrutura o log do Robô
+                                                            logProcessamentoModel.Data = DateTime.Now.ToString();
+                                                            logProcessamentoModel.Status = "NP";
+                                                            logProcessamentoModel.Descricao = "O Email não foi processado pois a Tabela enviada não existe";
+
+                                                            // Envia a Mensagem e ja encerra a conexão com o websocket
+                                                            webSocketMensagemEnviada = EmarHelper.EnviaMensagemWebSocket(logProcessamentoModel, webSocketCliente, true);
+
                                                             // Gera o Log de Processamento
                                                             if (!EmarADO.GERA_LOG_PROCESSAMENTO(
                                                                 _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
@@ -334,8 +371,8 @@ namespace WebsupplyEmar.API.Controllers
                                                                 nomeOriginal,
                                                                 jwtEmail,
                                                                 GeradorClaimsJWT.ConverteClaimsParaString(JWT_CLAIMS),
-                                                                "NP",
-                                                                "O Email não foi processado pois a Tabela enviada não existe"))
+                                                                logProcessamentoModel.Status,
+                                                                logProcessamentoModel.Descricao))
                                                             {
                                                                 // Gera o Log de operação do Robô
                                                                 LogMensagem = "Não foi possível gerar o log de processamento do Email Processado pois a Tabela não existe";
@@ -425,6 +462,14 @@ namespace WebsupplyEmar.API.Controllers
                                                             }
                                                         }
 
+                                                        // Estrutura o log do Robô
+                                                        logProcessamentoModel.Data = DateTime.Now.ToString();
+                                                        logProcessamentoModel.Status = "PR";
+                                                        logProcessamentoModel.Descricao = "O Email foi processado com sucesso";
+
+                                                        // Envia a Mensagem e ja encerra a conexão com o websocket
+                                                        webSocketMensagemEnviada = EmarHelper.EnviaMensagemWebSocket(logProcessamentoModel, webSocketCliente, true);
+
                                                         // Gera o Log de Processamento
                                                         if (!EmarADO.GERA_LOG_PROCESSAMENTO(
                                                             _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
@@ -440,8 +485,8 @@ namespace WebsupplyEmar.API.Controllers
                                                             nomeArquivoUnico,
                                                             jwtEmail,
                                                             GeradorClaimsJWT.ConverteClaimsParaString(JWT_CLAIMS),
-                                                            "PR",
-                                                            "O Email foi processado com sucesso"))
+                                                            logProcessamentoModel.Status,
+                                                            logProcessamentoModel.Descricao))
                                                         {
                                                             // Gera o Log de operação do Robô
                                                             LogMensagem = "Não foi possível gerar o log de processamento do Email Processado";
@@ -471,6 +516,14 @@ namespace WebsupplyEmar.API.Controllers
                                                 // ou se faz parte da assinatura de email
                                                 if (consultaAnexos.Value.Count() == 1 && AnexoAssinaturaEmail)
                                                 {
+                                                    // Estrutura o log do Robô
+                                                    logProcessamentoModel.Data = DateTime.Now.ToString();
+                                                    logProcessamentoModel.Status = "NP";
+                                                    logProcessamentoModel.Descricao = "O Email não foi processado pois o anexo foi identificado como parte da assinatura do Email";
+
+                                                    // Envia a Mensagem e ja encerra a conexão com o websocket
+                                                    webSocketMensagemEnviada = EmarHelper.EnviaMensagemWebSocket(logProcessamentoModel, webSocketCliente, true);
+
                                                     // Gera o Log de Processamento
                                                     if (!EmarADO.GERA_LOG_PROCESSAMENTO(
                                                         _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
@@ -486,8 +539,8 @@ namespace WebsupplyEmar.API.Controllers
                                                         NomeAnexoAssinaturaEmail,
                                                         jwtEmail,
                                                         GeradorClaimsJWT.ConverteClaimsParaString(JWT_CLAIMS),
-                                                        "NP",
-                                                        "O Email não foi processado pois o anexo foi identificado como parte da assinatura do Email"))
+                                                        logProcessamentoModel.Status,
+                                                        logProcessamentoModel.Descricao))
                                                     {
                                                         // Gera o Log de operação do Robô
                                                         LogMensagem = "Não foi possível gerar o log de processamento do Email com Anexo referente a assinatura do Email";
@@ -525,6 +578,14 @@ namespace WebsupplyEmar.API.Controllers
                                         }
                                         else
                                         {
+                                            // Estrutura o log do Robô
+                                            logProcessamentoModel.Data = DateTime.Now.ToString();
+                                            logProcessamentoModel.Status = "NP";
+                                            logProcessamentoModel.Descricao = "O Email não foi processado pois está sem anexo";
+
+                                            // Envia a Mensagem e ja encerra a conexão com o websocket
+                                            webSocketMensagemEnviada = EmarHelper.EnviaMensagemWebSocket(logProcessamentoModel, webSocketCliente, true);
+
                                             // Gera o Log de Processamento
                                             if (!EmarADO.GERA_LOG_PROCESSAMENTO(
                                                 _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
@@ -540,8 +601,8 @@ namespace WebsupplyEmar.API.Controllers
                                                 null,
                                                 jwtEmail,
                                                 GeradorClaimsJWT.ConverteClaimsParaString(JWT_CLAIMS),
-                                                "NP",
-                                                "O Email não foi processado pois está sem anexo"))
+                                                logProcessamentoModel.Status,
+                                                logProcessamentoModel.Descricao))
                                             {
                                                 // Gera o Log de operação do Robô
                                                 LogMensagem = "Não foi possível gerar o log de processamento do Email sem Anexo";
@@ -569,6 +630,14 @@ namespace WebsupplyEmar.API.Controllers
                                     }
                                     else
                                     {
+                                        // Estrutura o log do Robô
+                                        logProcessamentoModel.Data = DateTime.Now.ToString();
+                                        logProcessamentoModel.Status = "NP";
+                                        logProcessamentoModel.Descricao = "O Email não foi processado pois a estrutura do Token é inválida";
+
+                                        // Envia a Mensagem e ja encerra a conexão com o websocket
+                                        webSocketMensagemEnviada = EmarHelper.EnviaMensagemWebSocket(logProcessamentoModel, webSocketCliente, true);
+
                                         // Gera o Log de Processamento
                                         if (!EmarADO.GERA_LOG_PROCESSAMENTO(
                                             _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
@@ -584,8 +653,8 @@ namespace WebsupplyEmar.API.Controllers
                                             null,
                                             jwtEmail,
                                             GeradorClaimsJWT.ConverteClaimsParaString(JWT_CLAIMS),
-                                            "NP",
-                                            "O Email não foi processado pois a estrutura do Token é inválida"))
+                                            logProcessamentoModel.Status,
+                                            logProcessamentoModel.Descricao))
                                         {
                                             // Gera o Log de operação do Robô
                                             LogMensagem = "Não foi possível gerar o log de processamento do Email com Estrutura do Token Inválida";
@@ -613,6 +682,14 @@ namespace WebsupplyEmar.API.Controllers
                                 }
                                 else
                                 {
+                                    // Estrutura o log do Robô
+                                    logProcessamentoModel.Data = DateTime.Now.ToString();
+                                    logProcessamentoModel.Status = "NP";
+                                    logProcessamentoModel.Descricao = "O Email não foi processado pois o Token enviado já foi utilizado anteriormente";
+
+                                    // Envia a Mensagem e ja encerra a conexão com o websocket
+                                    webSocketMensagemEnviada = EmarHelper.EnviaMensagemWebSocket(logProcessamentoModel, webSocketCliente, true);
+
                                     // Gera o Log de Processamento
                                     if (!EmarADO.GERA_LOG_PROCESSAMENTO(
                                         _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
@@ -628,8 +705,8 @@ namespace WebsupplyEmar.API.Controllers
                                         null,
                                         jwtEmail,
                                         null,
-                                        "NP",
-                                        "O Email não foi processado pois o Token enviado já foi utilizado anteriormente"))
+                                        logProcessamentoModel.Status,
+                                        logProcessamentoModel.Descricao))
                                     {
                                         // Gera o Log de operação do Robô
                                         LogMensagem = "Não foi possível gerar o log de processamento do Email com Token Inválido";
@@ -657,6 +734,14 @@ namespace WebsupplyEmar.API.Controllers
                             }
                             else
                             {
+                                // Estrutura o log do Robô
+                                logProcessamentoModel.Data = DateTime.Now.ToString();
+                                logProcessamentoModel.Status = "NP";
+                                logProcessamentoModel.Descricao = "O Email não foi processado pois o Token está inválido";
+
+                                // Envia a Mensagem e ja encerra a conexão com o websocket
+                                webSocketMensagemEnviada = EmarHelper.EnviaMensagemWebSocket(logProcessamentoModel, webSocketCliente, true);
+
                                 // Gera o Log de Processamento
                                 if (!EmarADO.GERA_LOG_PROCESSAMENTO(
                                     _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
@@ -672,11 +757,11 @@ namespace WebsupplyEmar.API.Controllers
                                     null,
                                     jwtEmail,
                                     null,
-                                    "NP",
-                                    "O Email não foi processado pois o Token está inválido"))
+                                    logProcessamentoModel.Status,
+                                    logProcessamentoModel.Descricao))
                                 {
                                     // Gera o Log de operação do Robô
-                                    LogMensagem = "Não foi possível gerar o log de processamento do Email pois o Token já foi utilizado na base de dados";
+                                    LogMensagem = "Não foi possível gerar o log de processamento do Email com Token já utilizado.";
                                     GeraLog = EmarADO.GERA_LOG(
                                         _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
                                         LogMensagem
@@ -697,10 +782,17 @@ namespace WebsupplyEmar.API.Controllers
 
                                 // Adiciona o email processado a array
                                 emailsNaoProcessados.Add(email);
+
+                                // 
                             }
                         }
                         else
                         {
+                            // Estrutura o log do Robô
+                            logProcessamentoModel.Data = DateTime.Now.ToString();
+                            logProcessamentoModel.Status = "NP";
+                            logProcessamentoModel.Descricao = "O Email não foi processado pois esta sem Token";
+
                             // Gera o Log de Processamento
                             if (!EmarADO.GERA_LOG_PROCESSAMENTO(
                                 _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
@@ -716,8 +808,8 @@ namespace WebsupplyEmar.API.Controllers
                                 null,
                                 null,
                                 null,
-                                "NP",
-                                "O Email não foi processado pois esta sem Token"))
+                                logProcessamentoModel.Status,
+                                logProcessamentoModel.Descricao))
                             {
                                 // Gera o Log de operação do Robô
                                 LogMensagem = "Não foi possível gerar o log de processamento do Email de sem Token";
@@ -745,6 +837,11 @@ namespace WebsupplyEmar.API.Controllers
                     }
                     else
                     {
+                        // Estrutura o log do Robô
+                        logProcessamentoModel.Data = DateTime.Now.ToString();
+                        logProcessamentoModel.Status = "SP";
+                        logProcessamentoModel.Descricao = "O Email não foi processado por ser um SPAM";
+
                         // Gera o Log de Processamento
                         if (!EmarADO.GERA_LOG_PROCESSAMENTO(
                             _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
@@ -760,8 +857,8 @@ namespace WebsupplyEmar.API.Controllers
                             null,
                             null,
                             null,
-                            "SP",
-                            "O Email não foi processado por ser um SPAM"))
+                            logProcessamentoModel.Status,
+                            logProcessamentoModel.Descricao))
                         {
                             // Gera o Log de operação do Robô
                             LogMensagem = "Não foi possível gerar o log de processamento do Email de Spam";

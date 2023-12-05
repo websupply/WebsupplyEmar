@@ -250,24 +250,20 @@ namespace WebsupplyEmar.API.Helpers
                     return false;
                 }
 
+                // Encerra a Conexão dos Clientes com o servidor que será fechado
+                foreach (var socket in WebSockets.FindAll(websocket => websocket.Servidor == Servidor))
+                {
+                    socket.Conector.CloseAsync(WebSocketCloseStatus.NormalClosure, $"Conexão com o Servidor {Servidor} encerrada", CancellationToken.None);
+                }
+
+                // Remove os Clientes do Servidor que será encerrado
+                WebSockets.RemoveAll(websocket => websocket.Servidor == Servidor);
+
                 // Fecha o Servidor
                 httpListener.Close();
 
                 // Remove o Servidor da Lista
                 Servidores.Remove(Servidor);
-
-                // Limpa os WebSockets conectados do server
-                lock(objFechado)
-                {
-                    foreach (var socket in WebSockets)
-                    {
-                        if(socket.Servidor == Servidor)
-                        {
-                            socket.Conector.CloseAsync(WebSocketCloseStatus.NormalClosure, $"Conexão com o Servidor {Servidor} encerrada", CancellationToken.None);
-                            WebSockets.Remove(socket);
-                        }
-                    }
-                }
 
                 // Exibe a mensagem
                 WebSocketADO.GERA_LOG(Connection, $"Servidor {Servidor} parado com sucesso.");
