@@ -64,7 +64,10 @@ namespace WebsupplyEmar.API.Helpers
             // Adicione a mensagem à lista de mensagens
             lock (threadUnica)
             {
-                Mensagens.Add(webSocketMensagem);
+                if(webSocketMensagem.Tipo == "mensagem")
+                {
+                    Mensagens.Add(webSocketMensagem);
+                }
             }
 
             // Verifique se a mensagem atende aos critérios específicos
@@ -249,24 +252,62 @@ namespace WebsupplyEmar.API.Helpers
 
                     if (result.MessageType == WebSocketMessageType.Text)
                     {
-                        // Estrutura e envia a mensagem para o Servidor/Cliente recebida do Cliente atual
-                        webSocketMensagem = new WebSocketMensagem();
-
-                        webSocketMensagem.Mensagem = Encoding.UTF8.GetString(buffer.Array, 0, result.Count).Replace("\0", "");
-                        webSocketMensagem.Tipo = "mensagem";
-                        webSocketMensagem.Data = DateTime.Now;
-                        webSocketMensagem.Parametros = new
+                        // Verifica se o evento de mensagem é referente ao cliente digitando
+                        bool ClienteDigitando = false;
+                        try
                         {
-                            Servidor = Servidor,
-                            Usuario = context.Request.QueryString["Usuario"],
-                            Chave = context.Request.QueryString["Chave"]
-                        };
+                            string notificacaoCliente = JsonDocument.Parse(Encoding.UTF8.GetString(buffer.Array, 0, result.Count).Replace("\0", "")).RootElement.GetProperty("Tipo").GetString();
+                            
+                            if(notificacaoCliente == "digitando")
+                            {
+                                ClienteDigitando = true;
+                            }
+                            
+                        }
+                        catch(Exception ex)
+                        {
+                            ClienteDigitando = false;
+                        }
 
-                        ProcessaMensagem(Servidor, webSocketMensagem, context.Request.QueryString["Chave"]);
+                        // Verifica se irá enviar a mensagem que o cliente enviou ou se ira enviar uma notificação informando que o cliente está digitando
+                        if (ClienteDigitando)
+                        {
+                            // Estrutura e envia a mensagem para o Servidor/Cliente recebida do Cliente atual
+                            webSocketMensagem = new WebSocketMensagem();
 
-                        // Gera o Log no Banco de Dados
-                        WebSocketADO.GERA_LOG(Connection, $"Mensagem Recebida de {Servidor}: {webSocketMensagem.Mensagem}");
-                        Console.WriteLine($"Mensagem Recebida de {Servidor}: {webSocketMensagem.Mensagem}");
+                            webSocketMensagem.Mensagem = "";
+                            webSocketMensagem.Tipo = "digitando";
+                            webSocketMensagem.Data = DateTime.Now;
+                            webSocketMensagem.Parametros = new
+                            {
+                                Servidor = Servidor,
+                                Usuario = context.Request.QueryString["Usuario"],
+                                Chave = context.Request.QueryString["Chave"]
+                            };
+
+                            ProcessaMensagem(Servidor, webSocketMensagem, context.Request.QueryString["Chave"]);
+                        }
+                        else
+                        {
+                            // Estrutura e envia a mensagem para o Servidor/Cliente recebida do Cliente atual
+                            webSocketMensagem = new WebSocketMensagem();
+
+                            webSocketMensagem.Mensagem = Encoding.UTF8.GetString(buffer.Array, 0, result.Count).Replace("\0", "");
+                            webSocketMensagem.Tipo = "mensagem";
+                            webSocketMensagem.Data = DateTime.Now;
+                            webSocketMensagem.Parametros = new
+                            {
+                                Servidor = Servidor,
+                                Usuario = context.Request.QueryString["Usuario"],
+                                Chave = context.Request.QueryString["Chave"]
+                            };
+
+                            ProcessaMensagem(Servidor, webSocketMensagem, context.Request.QueryString["Chave"]);
+
+                            // Gera o Log no Banco de Dados
+                            WebSocketADO.GERA_LOG(Connection, $"Mensagem Recebida de {Servidor}: {webSocketMensagem.Mensagem}");
+                            Console.WriteLine($"Mensagem Recebida de {Servidor}: {webSocketMensagem.Mensagem}");
+                        }
                     }
                     else if (result.MessageType == WebSocketMessageType.Close)
                     {
