@@ -5,26 +5,48 @@ using System.Net.Sockets;
 using WebsupplyEmar.Dados.ADO;
 using System.Net.NetworkInformation;
 using Microsoft.Graph.Models;
+using System.Text.Json;
+using System;
+using Tavis.UriTemplates;
 
 namespace WebsupplyEmar.API.Helpers
 {
+    // Classe Responsável pela estrutura da mensagem do websocket
+    public class WebSocketMensagem
+    {
+        public string Mensagem { get; set; }
+        public string Tipo { get; set; }
+        public DateTime Data { get; set; }
+        public dynamic Parametros { get; set; }
+    }
+
+    // Classe Responsável Pela Estrutura dos dados do WebSocketHelper
     public class WebSocketClass
     {
-        public string Chave { get; set; }
         public string Servidor { get; set; }
+        public string Chave { get; set; }
+        public string Usuario { get; set; }
         public string Host { get; set; }
+        public int MinutosExpiracao { get; set; }
+        public DateTime DataConexao { get; set; }
+        public DateTime DataExpiracao { get; set; }
         public WebSocket Conector { get; set; }
     }
 
+    // Classe Responsável por Gerenciar o WebSocketHelper
     public class WebSocketHelper
     {
         private static Dictionary<string, HttpListener> Servidores = new Dictionary<string, HttpListener>();
         private static List<WebSocketClass> WebSockets = new List<WebSocketClass>();
-        private static List<string> Mensagens = new List<string>();
-        private static readonly object objFechado = new object();
+        private static List<WebSocketMensagem> Mensagens = new List<WebSocketMensagem>();
+        private static readonly object threadUnica = new object();
         private static bool LogGerado;
         private static string Connection;
 
+        // Cria a Instância da Classe responsável pela estrutura da mensagem de retorno do websocket
+        private static WebSocketMensagem webSocketMensagem = new WebSocketMensagem();
+
+        // Função para Definir a string de Conexão com o Banco de Dados
         public void DefineConexaoBD(string connection)
         {
             Connection = connection;
@@ -37,33 +59,35 @@ namespace WebsupplyEmar.API.Helpers
         public event MensagemRecebidaCallback OnMensagemEspecificaRecebida;
 
         // Função para Processar a Mensagem do WebSocket
-        private async Task ProcessaMensagem(string Servidor, string Mensagem, string Chave)
+        private async Task ProcessaMensagem(string Servidor, WebSocketMensagem webSocketMensagem, string Chave)
         {            
             // Adicione a mensagem à lista de mensagens
-            lock (objFechado)
+            lock (threadUnica)
             {
-                Mensagens.Add(Mensagem);
+                Mensagens.Add(webSocketMensagem);
             }
 
             // Verifique se a mensagem atende aos critérios específicos
-            if (Mensagem == "Tretas")
+            if (webSocketMensagem.Mensagem == "Tretas")
             {
                 // Chame o callback para a mensagem específica
-                OnMensagemEspecificaRecebida?.Invoke(Mensagem);
+                OnMensagemEspecificaRecebida?.Invoke(webSocketMensagem.Mensagem);
             }
 
             // Envie a mensagem para todos os clientes conectados
-            await TransmitirMensangem(Servidor, Mensagem, Chave);
+            await TransmitirMensangem(Servidor, webSocketMensagem, Chave);
 
             // Example: Echo the received message back to the client
             //await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken);
         }
 
-        private async Task TransmitirMensangem(string Sevidor, string Mensagem, string Chave)
+        // Função par Transmitir a Mensagem para os Clientes
+        private async Task TransmitirMensangem(string Sevidor, WebSocketMensagem webSocketMensagem, string Chave)
         {
-            byte[] buffer = Encoding.UTF8.GetBytes(Mensagem);
+            // Converte a mensagem em string e depois passa pro buffer
+            byte[] buffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(webSocketMensagem));
 
-            // Verifica se irá mandar mensagem somente para um cliente
+            // Verifica se irá mandar mensagem somente para uma sala
             if(Chave != null)
             {
                 try
@@ -90,7 +114,7 @@ namespace WebsupplyEmar.API.Helpers
                     Console.WriteLine($"Exceção gerada do WebSocket: {ex.Message}");
                 }
             }
-            // Envie a mensagem para todos os clientes conectados
+            // Envie a mensagem para todos os clientes conectados do servidor
             else
             {
                 foreach (var socket in WebSockets)
@@ -111,6 +135,7 @@ namespace WebsupplyEmar.API.Helpers
             }
         }
 
+        // Função para Iniciar o Servidor
         public async Task<bool> IniciaServidor(string Servidor)
         {
             try
@@ -158,6 +183,7 @@ namespace WebsupplyEmar.API.Helpers
             }
         }
 
+        // Função para Processar a Requisição feita ao Servidor
         private void ProcessaRequisicao(HttpListenerContext context, string Servidor)
         {
             // Adicione esta linha para permitir conexões de qualquer origem
@@ -166,23 +192,48 @@ namespace WebsupplyEmar.API.Helpers
             HttpListenerWebSocketContext webSocketContext = context.AcceptWebSocketAsync(subProtocol: null).GetAwaiter().GetResult();
             WebSocket webSocket = webSocketContext.WebSocket;
 
-            lock (objFechado)
+            lock (threadUnica)
             {
-                WebSocketClass newWebSocket = new WebSocketClass
+                // Cria a Estrutura do Cliente
+                WebSocketClass clienteWebSocket = new WebSocketClass
                 {
-                    Chave = context.Request.QueryString["Chave"] != null ? context.Request.QueryString["Chave"] : Guid.NewGuid().ToString(),
-                    Host = context.Request.RemoteEndPoint.ToString(),
                     Servidor = Servidor,
+                    Chave = context.Request.QueryString["Chave"] != null ? context.Request.QueryString["Chave"] : Guid.NewGuid().ToString(),
+                    Usuario = context.Request.QueryString["Usuario"] != null ? context.Request.QueryString["Usuario"] : Guid.NewGuid().ToString(),
+                    Host = context.Request.RemoteEndPoint.ToString(),
+                    MinutosExpiracao = context.Request.QueryString["MinutosExpiracao"] != null && int.TryParse(context.Request.QueryString["MinutosExpiracao"], out _) ? int.Parse(context.Request.QueryString["MinutosExpiracao"]) : 5,
+                    DataConexao = DateTime.Now,
                     Conector = webSocket
                 };
 
-                if (WebSockets.Find(find => find.Chave == newWebSocket.Chave
-                        && find.Servidor == newWebSocket.Servidor
-                        && find.Host == newWebSocket.Host) == null) {
-                    WebSockets.Add(newWebSocket);
+                // Insere a Data da Expiracão da Conexão do Cliente
+                clienteWebSocket.DataExpiracao = DateTime.Now.AddMinutes(clienteWebSocket.MinutosExpiracao);
 
-                    WebSocketADO.GERA_LOG(Connection, $"Conexão Iniciado no WebSocket ({Servidor}) por --- {newWebSocket.Host}");
-                    Console.WriteLine($"Conexão Iniciado no WebSocket ({Servidor}) por --- {newWebSocket.Host}");
+                // Verifica se o Cliente já foi criado e ja consta na listagem de clientes
+                if (WebSockets.Find(find => find.Chave == clienteWebSocket.Chave
+                        && find.Servidor == clienteWebSocket.Servidor
+                        && find.Host == clienteWebSocket.Host) == null) {
+
+                    // Dispara a Mensagem de Notificação para o Servidor/Sala que um novo cliente está conectado
+                    webSocketMensagem = new WebSocketMensagem();
+
+                    webSocketMensagem.Mensagem = $"Usuário {clienteWebSocket.Usuario} conectou na sala";
+                    webSocketMensagem.Tipo = "notificacao-conexao";
+                    webSocketMensagem.Data = DateTime.Now;
+                    webSocketMensagem.Parametros = new
+                    {
+                        Servidor = clienteWebSocket.Servidor,
+                        Usuario = clienteWebSocket.Usuario,
+                        Chave = clienteWebSocket.Chave
+                    };
+
+                    ProcessaMensagem(clienteWebSocket.Servidor, webSocketMensagem, clienteWebSocket.Chave);
+
+                    // Adiciona o Novo Cliente a Lista de Clientes Conectados
+                    WebSockets.Add(clienteWebSocket);
+
+                    WebSocketADO.GERA_LOG(Connection, $"Conexão Iniciado no WebSocket ({Servidor}) por --- {clienteWebSocket.Host}");
+                    Console.WriteLine($"Conexão Iniciado no WebSocket ({Servidor}) por --- {clienteWebSocket.Host}");
                 };
             }
 
@@ -190,27 +241,59 @@ namespace WebsupplyEmar.API.Helpers
             {
                 while (webSocket.State == WebSocketState.Open)
                 {
+                    // Cria o Buffer para receber a mensagem do websocket
                     ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[1024]);
 
+                    // Recebe a mensagem do websocket
                     WebSocketReceiveResult result = webSocket.ReceiveAsync(buffer, CancellationToken.None).GetAwaiter().GetResult();
 
                     if (result.MessageType == WebSocketMessageType.Text)
                     {
-                        string Mensagem = Encoding.UTF8.GetString(buffer.Array, 0, result.Count).Replace("\0", "");
+                        // Estrutura e envia a mensagem para o Servidor/Cliente recebida do Cliente atual
+                        webSocketMensagem = new WebSocketMensagem();
 
-                        WebSocketADO.GERA_LOG(Connection, $"Mensagem Recebida de {Servidor}: {Mensagem}");
-                        Console.WriteLine($"Mensagem Recebida de {Servidor}: {Mensagem}");
+                        webSocketMensagem.Mensagem = Encoding.UTF8.GetString(buffer.Array, 0, result.Count).Replace("\0", "");
+                        webSocketMensagem.Tipo = "mensagem";
+                        webSocketMensagem.Data = DateTime.Now;
+                        webSocketMensagem.Parametros = new
+                        {
+                            Servidor = Servidor,
+                            Usuario = context.Request.QueryString["Usuario"],
+                            Chave = context.Request.QueryString["Chave"]
+                        };
 
-                        ProcessaMensagem(Servidor, Mensagem, context.Request.QueryString["Chave"]);
+                        ProcessaMensagem(Servidor, webSocketMensagem, context.Request.QueryString["Chave"]);
+
+                        // Gera o Log no Banco de Dados
+                        WebSocketADO.GERA_LOG(Connection, $"Mensagem Recebida de {Servidor}: {webSocketMensagem.Mensagem}");
+                        Console.WriteLine($"Mensagem Recebida de {Servidor}: {webSocketMensagem.Mensagem}");
                     }
                     else if (result.MessageType == WebSocketMessageType.Close)
                     {
+                        // Envia a Mensagem para Servidor/ Sala que o cliente ira desconectar
+                        webSocketMensagem = new WebSocketMensagem();
+
+                        webSocketMensagem.Mensagem = $"Usuário {context.Request.QueryString["Usuario"]} desconectou";
+                        webSocketMensagem.Tipo = "notificacao-desconexao";
+                        webSocketMensagem.Data = DateTime.Now;
+                        webSocketMensagem.Parametros = new
+                        {
+                            Servidor = Servidor,
+                            Usuario = context.Request.QueryString["Usuario"],
+                            Chave = context.Request.QueryString["Chave"]
+                        };
+
+                        ProcessaMensagem(Servidor, webSocketMensagem, context.Request.QueryString["Chave"]);
+
+                        // Gera o Log no Banco de Dados
                         WebSocketADO.GERA_LOG(Connection, $"Conexão Encerrada pelo Cliente --- {context.Request.RemoteEndPoint}");
                         Console.WriteLine($"Conexão Encerrada pelo Cliente --- {context.Request.RemoteEndPoint}");
 
+                        // Desconecta o Cliente do Servidor/Sala
                         webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Conexão Encerrada pelo Cliente", CancellationToken.None);
 
-                        lock (objFechado)
+                        // Remove o Cliente da Lista de Clientes Conectados
+                        lock (threadUnica)
                         {
                             WebSockets.Remove(WebSockets.Find(websocket => websocket.Host == context.Request.RemoteEndPoint.ToString()));
                         }
@@ -224,11 +307,23 @@ namespace WebsupplyEmar.API.Helpers
             }
             finally
             {
+                // Encerra a Conexão do Cliente se o Servidor for desconectado
                 if (webSocket.State == WebSocketState.Open)
                 {
-                    webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Conexão Encerrada pelo Servidor", CancellationToken.None);
+                    // Envia a Mensagem para Servidor/Sala que o cliente ira desconectar
+                    webSocketMensagem = new WebSocketMensagem();
 
-                    lock (objFechado)
+                    webSocketMensagem.Mensagem = $"Usuário {context.Request.QueryString["Usuario"]} desconectou";
+                    webSocketMensagem.Tipo = "notificacao-desconexao";
+                    webSocketMensagem.Data = DateTime.Now;
+
+                    ProcessaMensagem(Servidor, webSocketMensagem, context.Request.QueryString["Chave"]);
+
+                    // Desconecta o Cliente do Servidor/Sala
+                    webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Conexão Encerrada pelo Servidor", CancellationToken.None);
+                    
+                    // Remove o Cliente da Lista de Clientes Conectados
+                    lock (threadUnica)
                     {
                         WebSockets.Remove(WebSockets.Find(websocket => websocket.Host == context.Request.RemoteEndPoint.ToString()));
                     }
@@ -249,6 +344,15 @@ namespace WebsupplyEmar.API.Helpers
                     Console.WriteLine($"Não foi possível localizar o servidor {Servidor}.");
                     return false;
                 }
+
+                // Envia a Mensagem para Servidor/Sala que o cliente ira desconectar
+                webSocketMensagem = new WebSocketMensagem();
+
+                webSocketMensagem.Mensagem = "Você foi desconectado do Servidor pois o mesmo foi encerrado";
+                webSocketMensagem.Tipo = "notificacao-desconexao";
+                webSocketMensagem.Data = DateTime.Now;
+
+                await ProcessaMensagem(Servidor, webSocketMensagem, null);
 
                 // Encerra a Conexão dos Clientes com o servidor que será fechado
                 foreach (var socket in WebSockets.FindAll(websocket => websocket.Servidor == Servidor))
