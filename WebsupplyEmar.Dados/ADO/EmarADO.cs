@@ -77,7 +77,8 @@ namespace WebsupplyEmar.Dados.ADO
 
         public static bool GERA_LOG_PROCESSAMENTO(
             string Connection, string cCGC, string cCCUSTO,
-            string cREQUISIT, string cGRAPH_EMAIL_ID, string cGRAPH_EMAIL_SUBJECT,
+            string cREQUISIT, string cCDGPED, string cCL_CDG,
+            string cCODPROD, string cCODITEM, string cCGCF, string cGRAPH_EMAIL_ID, string cGRAPH_EMAIL_SUBJECT,
             string cGRAPH_EMAIL_SENDER_NAME, string cGRAPH_EMAIL_SENDER_EMAIL, string cGRAPH_EMAIL_BODY,
             string cGRAPH_EMAIL_HASATTACHMENTS, string cANEXO, string cTOKEN_JWT,
             string cTOKEN_JWT_DECRYPT, string cSTATUS, string cDESCRICAO_LOG)
@@ -90,6 +91,11 @@ namespace WebsupplyEmar.Dados.ADO
             parametros.Add(new SqlParameter("@cCGC", cCGC));
             parametros.Add(new SqlParameter("@cCCUSTO", cCCUSTO));
             parametros.Add(new SqlParameter("@cREQUISIT", cREQUISIT));
+            parametros.Add(new SqlParameter("@iCDGPED", cCDGPED));
+            parametros.Add(new SqlParameter("@cCODPROD", cCODPROD));
+            parametros.Add(new SqlParameter("@iCODITEM", cCODITEM));
+            parametros.Add(new SqlParameter("@iCL_CDG", cCL_CDG));
+            parametros.Add(new SqlParameter("@cCGCF", cCGCF));
             parametros.Add(new SqlParameter("@cGRAPH_EMAIL_ID", cGRAPH_EMAIL_ID));
             parametros.Add(new SqlParameter("@cGRAPH_EMAIL_SUBJECT", cGRAPH_EMAIL_SUBJECT));
             parametros.Add(new SqlParameter("@cGRAPH_EMAIL_SENDER_NAME", cGRAPH_EMAIL_SENDER_NAME));
