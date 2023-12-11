@@ -214,7 +214,7 @@ namespace WebsupplyEmar.API.Helpers
                         Chave = context.Request.QueryString["Chave"] != null ? context.Request.QueryString["Chave"] : Guid.NewGuid().ToString(),
                         Usuario = context.Request.QueryString["Usuario"] != null ? context.Request.QueryString["Usuario"] : Guid.NewGuid().ToString(),
                         Host = context.Request.RemoteEndPoint.ToString(),
-                        MinutosExpiracao = context.Request.QueryString["MinutosExpiracao"] != null && int.TryParse(context.Request.QueryString["MinutosExpiracao"], out _) ? int.Parse(context.Request.QueryString["MinutosExpiracao"]) : 1,
+                        MinutosExpiracao = context.Request.QueryString["MinutosExpiracao"] != null && int.TryParse(context.Request.QueryString["MinutosExpiracao"], out _) ? int.Parse(context.Request.QueryString["MinutosExpiracao"]) : 5,
                         DataConexao = DateTime.Now,
                         Conector = Conector
                     };
