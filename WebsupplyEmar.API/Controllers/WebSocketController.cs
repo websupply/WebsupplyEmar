@@ -28,10 +28,15 @@ namespace WebsupplyEmar.API.Controllers
         }
 
         [HttpGet("inicia_servidor")]
-        public async Task<IActionResult> IniciaServidor(string Servidor)
+        public async Task<IActionResult> IniciaServidor()
         {
+            // Define o Servidor
+            string Prefixo = Request.Scheme == "https" ? "https://" : "http://";
+            string Servidor = _configuration.GetValue<string>("WebSockets:Host");
+            string Porta = ":" + (Request.Scheme == "https" ? _configuration.GetValue<string>("WebSockets:PortaSSL") : _configuration.GetValue<string>("WebSockets:Porta")) + "/";
 
-            bool success = await _webSocketHelper.IniciaServidor(Servidor);
+            // Inicia o Servidor
+            bool success = await _webSocketHelper.IniciaServidor(Prefixo + Servidor + Porta);
 
             if (success)
             {

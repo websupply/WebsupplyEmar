@@ -136,6 +136,10 @@ namespace WebsupplyEmar.API.Controllers
             ClientWebSocket webSocketCliente;
             bool webSocketMensagemEnviada = false;
 
+            string Prefixo = Request.Scheme == "https" ? "wss://" : "ws://";
+            string Servidor = _configuration.GetValue<string>("WebSockets:Host");
+            string Porta = ":" + (Request.Scheme == "https" ? _configuration.GetValue<string>("WebSockets:PortaSSL") : _configuration.GetValue<string>("WebSockets:Porta")) + "/";
+
             // Gera o Log de operação do Robô
             LogMensagem = "Inicialização do Processamento de Anexos via E-Mail";
             GeraLog = EmarADO.GERA_LOG(
@@ -209,7 +213,7 @@ namespace WebsupplyEmar.API.Controllers
                             string jwtEmail = match.Groups[1].Value;
 
                             // Define a Uri do WebSocket
-                            webSocketUri = new Uri(_configuration.GetValue<string>("WebSockets:URI") + ":" + _configuration.GetValue<string>("WebSockets:Porta") + "/?Chave=" + jwtEmail);
+                            webSocketUri = new Uri(Prefixo + Servidor + Porta + "?Chave=" + jwtEmail);
                             
                             // Define o Cliente do WebSocket
                             webSocketCliente = new ClientWebSocket();
