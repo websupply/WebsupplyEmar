@@ -57,7 +57,7 @@ namespace WebsupplyEmar.API.Controllers
             string Porta = ":" + (Request.Scheme == "https" ? _configuration.GetValue<string>("WebSockets:PortaSSL") : _configuration.GetValue<string>("WebSockets:Porta")) + "/";
 
             // Para o Servidor
-            bool success = await _webSocketHelper.FechaServidor(Prefixo + Servidor + Porta));
+            bool success = await _webSocketHelper.FechaServidor(Prefixo + Servidor + Porta);
 
             if (success)
             {
