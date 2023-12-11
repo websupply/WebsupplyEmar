@@ -49,9 +49,15 @@ namespace WebsupplyEmar.API.Controllers
         }
 
         [HttpGet("fecha_servidor")]
-        public async Task<IActionResult> FechaServidor(string Servidor)
+        public async Task<IActionResult> FechaServidor()
         {
-            bool success = await _webSocketHelper.FechaServidor(Servidor);
+            // Define o Servidor
+            string Prefixo = Request.Scheme == "https" ? "https://" : "http://";
+            string Servidor = _configuration.GetValue<string>("WebSockets:Host");
+            string Porta = ":" + (Request.Scheme == "https" ? _configuration.GetValue<string>("WebSockets:PortaSSL") : _configuration.GetValue<string>("WebSockets:Porta")) + "/";
+
+            // Para o Servidor
+            bool success = await _webSocketHelper.FechaServidor(Prefixo + Servidor + Porta));
 
             if (success)
             {
