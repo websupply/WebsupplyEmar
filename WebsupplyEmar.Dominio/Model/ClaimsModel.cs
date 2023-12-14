@@ -12,6 +12,7 @@ namespace WebsupplyEmar.Dominio.Model
         public string CGC { get; set; }
         public string CCUSTO { get; set; }
         public string REQUISIT { get; set; }
+        public string AMBIENTE { get; set; }
         public string TABELA { get; set; }
         public string? CGCF { get; set; }
         public string? CDGPED { get; set; }
