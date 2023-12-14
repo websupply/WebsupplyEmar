@@ -999,19 +999,28 @@ namespace WebsupplyEmar.API.Controllers
                         emailsSpam.Add(email);
                     }
 
-                    // Faz a leitura do Email
-                    var visualizaEmail = await ambienteGraph.Users[userMailId].MailFolders["inbox"].Messages[email.Id].PatchAsync(
-                        new Microsoft.Graph.Models.Message
-                        {
-                            IsRead = true,
-                        });
+                    // Try/Catch para caso o processamento do e-mail cai aqui e o email não seja do mesmo ambiente
+                    try
+                    {
+                        // Faz a leitura do Email
+                        var visualizaEmail = await ambienteGraph.Users[userMailId].MailFolders["inbox"].Messages[email.Id].PatchAsync(
+                            new Microsoft.Graph.Models.Message
+                            {
+                                IsRead = true,
+                            });
 
-                    // Move o Email para a Pasta de Processados
-                    var moveEmail = await ambienteGraph.Users[userMailId].MailFolders["inbox"].Messages[email.Id].Move.PostAsync(
-                        new Microsoft.Graph.Users.Item.MailFolders.Item.Messages.Item.Move.MovePostRequestBody
-                        {
-                            DestinationId = pastaDestino
-                        });
+                        // Move o Email para a Pasta de Processados
+                        var moveEmail = await ambienteGraph.Users[userMailId].MailFolders["inbox"].Messages[email.Id].Move.PostAsync(
+                            new Microsoft.Graph.Users.Item.MailFolders.Item.Messages.Item.Move.MovePostRequestBody
+                            {
+                                DestinationId = pastaDestino
+                            });
+                    }
+                    catch(Exception ex)
+                    {
+
+                    }
+
                 }
             }
 
