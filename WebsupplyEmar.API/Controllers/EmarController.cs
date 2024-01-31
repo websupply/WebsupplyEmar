@@ -361,8 +361,13 @@ namespace WebsupplyEmar.API.Controllers
                                                                 FileAttachment anexo = (FileAttachment)consultaAnexos.Value[j];
 
                                                                 // Verifica se o anexo não faz parte da assinatura de email
-                                                                if (!(bool)anexo.IsInline && anexo.ContentId == null)
+                                                                if (!(bool)anexo.IsInline)
                                                                 {
+                                                                    // reseta os parametros de validação de imagem/assinatura
+                                                                    // por ter um anexo válido e fora da assinatura
+                                                                    AnexoAssinaturaEmail = false;
+                                                                    NomeAnexoAssinaturaEmail = null;
+
                                                                     // Declara as variaveis de gestão do arquivo
                                                                     string nomeOriginal = anexo.Name;
                                                                     string diretorioDestino = objEmarAmbiente.DriverFisicoArquivos;
@@ -619,7 +624,7 @@ namespace WebsupplyEmar.API.Controllers
                                                         }
                                                         // Verifica se houve somente um anexo, e se este anexo é valido
                                                         // ou se faz parte da assinatura de email
-                                                        else if (consultaAnexos.Value.Count() == 1 && AnexoAssinaturaEmail)
+                                                        else if (consultaAnexos.Value.Count() > 0 && AnexoAssinaturaEmail)
                                                         {
                                                             // Estrutura o log do Robô
                                                             logProcessamentoModel.Data = DateTime.Now.ToString();
