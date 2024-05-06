@@ -269,7 +269,7 @@ namespace WebsupplyEmar.API.Controllers
                                                     // Define os multiplos anexos como S somente para a cotação
                                                     string MultiplosAnexos = "N";
 
-                                                    if (JWT_CLAIMS.TABELA == "CL_PROCESSO_ANEXO")
+                                                    if (JWT_CLAIMS.TABELA == "CL_PROCESSO_ANEXO" || JWT_CLAIMS.TABELA == "PEDIDOS_ARQUIVOS")
                                                     {
                                                         MultiplosAnexos = "S";
                                                     }
@@ -387,6 +387,10 @@ namespace WebsupplyEmar.API.Controllers
                                                                     {
                                                                         diretorioDestino += "\\" + JWT_CLAIMS.CL_CDG;
                                                                     }
+                                                                    else if (JWT_CLAIMS.TABELA == "PEDIDOS_ARQUIVOS")
+                                                                    {
+                                                                        diretorioDestino += "\\" + JWT_CLAIMS.CL_CDG;
+                                                                    }
                                                                     else
                                                                     {
                                                                         // Estrutura o log do Robô
@@ -489,6 +493,31 @@ namespace WebsupplyEmar.API.Controllers
                                                                             JWT_CLAIMS.TIPO,
                                                                             nomeArquivoUnico,
                                                                             JWT_CLAIMS.DISPONIVEL_FORNEC))
+                                                                        {
+                                                                            // Gera o Log de operação do Robô
+                                                                            LogMensagem = "O Serviço foi interrompido pois não foi possível salvar o arquivo no banco.";
+                                                                            GeraLog = EmarADO.GERA_LOG(
+                                                                                _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
+                                                                                LogMensagem
+                                                                                );
+
+                                                                            // Retorna erro
+                                                                            return APIResponseHelper.EstruturaResponse(
+                                                                                "Ops",
+                                                                                LogMensagem,
+                                                                                "error",
+                                                                                null,
+                                                                                400,
+                                                                                Url.Action("processar_emails", "Emar", null, Request.Scheme));
+                                                                        }
+                                                                    }
+                                                                    else if (JWT_CLAIMS.TABELA == "PEDIDOS_ARQUIVOS")
+                                                                    {
+                                                                        if (!EmarADO.PROCESSA_PEDIDOS_ARQUIVOS(
+                                                                            _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
+                                                                            JWT_CLAIMS.CDGPED,
+                                                                            JWT_CLAIMS.TIPO,
+                                                                            nomeArquivoUnico))
                                                                         {
                                                                             // Gera o Log de operação do Robô
                                                                             LogMensagem = "O Serviço foi interrompido pois não foi possível salvar o arquivo no banco.";

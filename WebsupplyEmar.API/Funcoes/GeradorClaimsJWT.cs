@@ -235,6 +235,11 @@ namespace WebsupplyEmar.API.Funcoes
                 if(objClaims.DISPONIVEL_FORNEC == null) return false;
                 if(objClaims.TIPO == null) return false;
             }
+            else if (objClaims.TABELA == "PEDIDOS_ARQUIVOS")
+            {
+                if (objClaims.CDGPED == null) return false;
+                if (objClaims.TIPO == null) return false;
+            }
             else
             {
                 return false;

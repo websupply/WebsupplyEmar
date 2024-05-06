@@ -205,5 +205,31 @@ namespace WebsupplyEmar.Dados.ADO
 
             return Valido;
         }
+
+        public static bool PROCESSA_PEDIDOS_ARQUIVOS(string Connection, string iCdgPed, string iID_Tipo, string vNome_Arquivo)
+        {
+            ConexaoSQLServer Conn = new ConexaoSQLServer(Connection);
+
+            string NomeProcedure = "Pedidos_Arquivos_Ins";
+
+            List<SqlParameter> parametros = new List<SqlParameter>();
+            parametros.Add(new SqlParameter("@iCdgPed", iCdgPed));
+            parametros.Add(new SqlParameter("@iID_Tipo", iID_Tipo));
+            parametros.Add(new SqlParameter("@vNome_Arquivo", vNome_Arquivo));
+
+            try
+            {
+                Conn.ExecutaComParametros(NomeProcedure, parametros);
+                Conn.Dispose();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Conn.Dispose();
+
+                return false;
+            }
+        }
     }
 }
