@@ -1,23 +1,34 @@
-﻿{
-  "$schema": "https://json.schemastore.org/launchsettings.json",
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:6082",
-      "sslPort": 44389
-    }
-  },
+{
   "profiles": {
-    "WebsupplyEmar.API": {
+    "DEV - WebsupplyEmar.API": {
       "commandName": "Project",
-      "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "https://localhost:7270;http://localhost:5003",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "https://localhost:7270;http://localhost:5003"
+    },
+    "HOM - WebsupplyEmar.API": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Staging"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "https://localhost:7270;http://localhost:5003"
+    },
+    "PRD - WebsupplyEmar.API": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "https://localhost:7270;http://localhost:5003"
     },
     "IIS Express": {
       "commandName": "IISExpress",
@@ -26,6 +37,15 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    }
+  },
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:6082",
+      "sslPort": 44389
     }
   }
 }
