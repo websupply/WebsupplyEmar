@@ -411,11 +411,10 @@ namespace WebsupplyEmar.API.Controllers
                                                                 // Adiciona o Nome do Anexo a listagem de anexos
                                                                 nomesAnexos += consultaAnexos.Value[j].Name + ", ";
 
-                                                                // Valida se é um arquivo permitido e caso não adiciona ao contador
-                                                                if (!validaTipoAnexo)
+                                                                // Valida se é um arquivo permitido e ese não está vazio e caso não adiciona ao contador
+                                                                if (!validaTipoAnexo || ((FileAttachment)consultaAnexos.Value[j]).ContentBytes == null)
                                                                 {
                                                                     anexosInvalidos++;
-
                                                                 }
                                                             }
 
@@ -645,7 +644,7 @@ namespace WebsupplyEmar.API.Controllers
                                                                     // Estrutura o log do Robô
                                                                     logProcessamentoModel.Data = DateTime.Now.ToString();
                                                                     logProcessamentoModel.Status = "NP";
-                                                                    logProcessamentoModel.Descricao = "O Email não foi processado pois o anexo foi identificado como parte da assinatura ou do corpo do Email";
+                                                                    logProcessamentoModel.Descricao = "O Email não foi processado pois o(s) anexo(s) foram identificados como parte da assinatura ou do corpo do Email";
 
                                                                     // Envia a Mensagem e ja encerra a conexão com o websocket
                                                                     webSocketMensagemEnviada = EmarHelper.EnviaMensagemWebSocket(logProcessamentoModel, webSocketCliente, true);
@@ -703,7 +702,7 @@ namespace WebsupplyEmar.API.Controllers
                                                                 // Estrutura o log do Robô
                                                                 logProcessamentoModel.Data = DateTime.Now.ToString();
                                                                 logProcessamentoModel.Status = "NP";
-                                                                logProcessamentoModel.Descricao = "O Email não foi processado pois este tipo de anexo não é permitido";
+                                                                logProcessamentoModel.Descricao = "O Email não foi processado pois este(s) tipo(s) de anexo(s) não são permitido(s) ou estão vazio(s)";
 
                                                                 // Envia a Mensagem e ja encerra a conexão com o websocket
                                                                 webSocketMensagemEnviada = EmarHelper.EnviaMensagemWebSocket(logProcessamentoModel, webSocketCliente, true);
