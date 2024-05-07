@@ -219,21 +219,30 @@ namespace WebsupplyEmar.Dados.ADO
             parametros.Add(new SqlParameter("@iID_Tipo", iID_Tipo));
             parametros.Add(new SqlParameter("@vNome_Arquivo", vNome_Arquivo));
 
-            using (var reader = Conn.ExecutaComParametros(NomeProcedure, parametros))
+            try
             {
-                while (reader.HasRows)
+                using (var reader = Conn.ExecutaComParametros(NomeProcedure, parametros))
                 {
-                    while (reader.Read())
+                    while (reader.HasRows)
                     {
-                        ID_Arquivo = Convert.ToInt32(reader["ID_Arquivo"]);
+                        while (reader.Read())
+                        {
+                            ID_Arquivo = Convert.ToInt32(reader["ID_Arquivo"]);
+                        }
+                        reader.NextResult();
                     }
-                    reader.NextResult();
                 }
-            }
 
-            Conn.Dispose();
-            
-            return ID_Arquivo;
+                Conn.Dispose();
+
+                return ID_Arquivo;
+            }
+            catch (Exception ex)
+            {
+                Conn.Dispose();
+
+                return ID_Arquivo;
+            }
         }
     }
 }
