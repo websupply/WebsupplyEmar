@@ -459,22 +459,18 @@ namespace WebsupplyEmar.API.Controllers
                                                                             Directory.CreateDirectory(diretorioDestino);
                                                                         }
 
-                                                                        // Verifica se este arquivo ja existe e caso sim, gera um nome unico para este arquivo
-                                                                        string nomeArquivoUnico = ArquivoHelper.ObterNomeUnico(diretorioDestino, nomeOriginal);
-
-                                                                        // Seta o caminho completo de destino
-                                                                        string caminhoDestino = Path.Combine(diretorioDestino, nomeArquivoUnico);
-
-                                                                        // Salva o arquivo
-                                                                        System.IO.File.WriteAllBytes(caminhoDestino, anexo.ContentBytes);
+                                                                        // Define os Parametros bases da importação do arquivo
+                                                                        string nomeArquivoUnico = null;
+                                                                        string caminhoDestino = null;
 
                                                                         // Realiza o registro do anexo no banco de dados
                                                                         if (JWT_CLAIMS.TABELA == "PedidosItens_Temp")
                                                                         {
+                                                                            // Realiza a Importação do Anexo
                                                                             if (!EmarADO.PROCESSA_ANEXO_PEDIDOITENS(
                                                                                 _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
                                                                                 JWT_CLAIMS.CDGPED,
-                                                                                nomeArquivoUnico,
+                                                                                nomeOriginal,
                                                                                 JWT_CLAIMS.CODPROD,
                                                                                 JWT_CLAIMS.CODITEM,
                                                                                 JWT_CLAIMS.CGCF))
@@ -495,14 +491,24 @@ namespace WebsupplyEmar.API.Controllers
                                                                                     400,
                                                                                     Url.Action("processar_emails", "Emar", null, Request.Scheme));
                                                                             }
+
+                                                                            // Verifica se este arquivo ja existe e caso sim, gera um nome unico para este arquivo
+                                                                            nomeArquivoUnico = ArquivoHelper.ObterNomeUnico(diretorioDestino, nomeOriginal);
+
+                                                                            // Seta o caminho completo de destino
+                                                                            caminhoDestino = Path.Combine(diretorioDestino, nomeArquivoUnico);
+
+                                                                            // Salva o arquivo
+                                                                            System.IO.File.WriteAllBytes(caminhoDestino, anexo.ContentBytes);
                                                                         }
                                                                         else if (JWT_CLAIMS.TABELA == "CL_PROCESSO_ANEXO")
                                                                         {
+                                                                            // Realiza a Importação do Anexo
                                                                             if (!EmarADO.PROCESSA_ANEXO_CL_PROCESSO_ANEXO(
                                                                                 _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
                                                                                 JWT_CLAIMS.CL_CDG,
                                                                                 JWT_CLAIMS.TIPO,
-                                                                                nomeArquivoUnico,
+                                                                                nomeOriginal,
                                                                                 JWT_CLAIMS.DISPONIVEL_FORNEC))
                                                                             {
                                                                                 // Gera o Log de operação do Robô
@@ -521,14 +527,26 @@ namespace WebsupplyEmar.API.Controllers
                                                                                     400,
                                                                                     Url.Action("processar_emails", "Emar", null, Request.Scheme));
                                                                             }
+
+                                                                            // Verifica se este arquivo ja existe e caso sim, gera um nome unico para este arquivo
+                                                                            nomeArquivoUnico = ArquivoHelper.ObterNomeUnico(diretorioDestino, nomeOriginal);
+
+                                                                            // Seta o caminho completo de destino
+                                                                            caminhoDestino = Path.Combine(diretorioDestino, nomeArquivoUnico);
+
+                                                                            // Salva o arquivo
+                                                                            System.IO.File.WriteAllBytes(caminhoDestino, anexo.ContentBytes);
                                                                         }
                                                                         else if (JWT_CLAIMS.TABELA == "PEDIDOS_ARQUIVOS")
                                                                         {
-                                                                            if (!EmarADO.PROCESSA_PEDIDOS_ARQUIVOS(
+                                                                            // Realiza a Importação do Anexo
+                                                                            int ID_Arquivo = EmarADO.PROCESSA_PEDIDOS_ARQUIVOS(
                                                                                 _configuration.GetValue<string>("ConnectionStrings:DefaultConnection"),
                                                                                 JWT_CLAIMS.CDGPED,
                                                                                 JWT_CLAIMS.TIPO,
-                                                                                nomeArquivoUnico))
+                                                                                nomeOriginal);
+
+                                                                            if (ID_Arquivo == 0)
                                                                             {
                                                                                 // Gera o Log de operação do Robô
                                                                                 LogMensagem = "O Serviço foi interrompido pois não foi possível salvar o arquivo no banco.";
@@ -546,6 +564,18 @@ namespace WebsupplyEmar.API.Controllers
                                                                                     400,
                                                                                     Url.Action("processar_emails", "Emar", null, Request.Scheme));
                                                                             }
+
+                                                                            // Pega a Extensão do Arquivo
+                                                                            string[] nomeArquivoSplit = nomeOriginal.Split(".");
+
+                                                                            // Parametriza o ID como Nome do Arquivo
+                                                                            nomeArquivoUnico = ID_Arquivo.ToString() + "." + nomeArquivoSplit[nomeArquivoSplit.Count() - 1];
+
+                                                                            // Seta o caminho completo de destino
+                                                                            caminhoDestino = Path.Combine(diretorioDestino, nomeArquivoUnico);
+
+                                                                            // Salva o arquivo
+                                                                            System.IO.File.WriteAllBytes(caminhoDestino, anexo.ContentBytes);
                                                                         }
 
                                                                         // Adiciona ao Contador de anexosProcessados

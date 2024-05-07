@@ -206,8 +206,10 @@ namespace WebsupplyEmar.Dados.ADO
             return Valido;
         }
 
-        public static bool PROCESSA_PEDIDOS_ARQUIVOS(string Connection, string iCdgPed, string iID_Tipo, string vNome_Arquivo)
+        public static int PROCESSA_PEDIDOS_ARQUIVOS(string Connection, string iCdgPed, string iID_Tipo, string vNome_Arquivo)
         {
+            int ID_Arquivo = 0;
+
             ConexaoSQLServer Conn = new ConexaoSQLServer(Connection);
 
             string NomeProcedure = "Pedidos_Arquivos_Ins";
@@ -217,19 +219,21 @@ namespace WebsupplyEmar.Dados.ADO
             parametros.Add(new SqlParameter("@iID_Tipo", iID_Tipo));
             parametros.Add(new SqlParameter("@vNome_Arquivo", vNome_Arquivo));
 
-            try
+            using (var reader = Conn.ExecutaComParametros(NomeProcedure, parametros))
             {
-                Conn.ExecutaComParametros(NomeProcedure, parametros);
-                Conn.Dispose();
-
-                return true;
+                while (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        ID_Arquivo = (int)reader["ID_Arquivo"];
+                    }
+                    reader.NextResult();
+                }
             }
-            catch (Exception ex)
-            {
-                Conn.Dispose();
 
-                return false;
-            }
+            Conn.Dispose();
+            
+            return ID_Arquivo;
         }
     }
 }
