@@ -225,7 +225,7 @@ namespace WebsupplyEmar.Dados.ADO
                 {
                     while (reader.Read())
                     {
-                        ID_Arquivo = (int)reader["ID_Arquivo"];
+                        ID_Arquivo = Convert.ToInt32(reader["ID_Arquivo"]);
                     }
                     reader.NextResult();
                 }
