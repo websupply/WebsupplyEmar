@@ -31,7 +31,7 @@ namespace WebsupplyEmar.API.Controllers
             _configuration = configuration;
             if (_configuration["Environment"] == "Development") ambiente = "DEV";
             if (_configuration["Environment"] == "Staging") ambiente = "HOM";
-            if (_configuration["Environment"] == "Production") ambiente = "PROD";
+            if (_configuration["Environment"] == "Production1" || _configuration["Environment"] == "Production2" ) ambiente = "PROD";
         }
 
         [HttpPost]
