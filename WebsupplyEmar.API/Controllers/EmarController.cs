@@ -269,7 +269,10 @@ namespace WebsupplyEmar.API.Controllers
                                                     // Define os multiplos anexos como S somente para a cotação
                                                     string MultiplosAnexos = "N";
 
-                                                    if (JWT_CLAIMS.TABELA == "CL_PROCESSO_ANEXO" || JWT_CLAIMS.TABELA == "PEDIDOS_ARQUIVOS")
+                                                    if (
+                                                        JWT_CLAIMS.TABELA == "CL_PROCESSO_ANEXO" ||
+                                                        JWT_CLAIMS.TABELA == "PEDIDOS_ARQUIVOS" ||
+                                                        JWT_CLAIMS.TABELA == "PedidosItens_Temp")
                                                     {
                                                         MultiplosAnexos = "S";
                                                     }
