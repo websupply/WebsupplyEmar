@@ -127,13 +127,13 @@ namespace WebsupplyEmar.Dados.ADO
         {
             ConexaoSQLServer Conn = new ConexaoSQLServer(Connection);
 
-            string NomeProcedure = "SP_PedidosItens_temp_Arquivo_Anexo_UPD";
+            string NomeProcedure = "SP_Cheil_PedidosItens_temp_Anexos_ins";
 
             List<SqlParameter> parametros = new List<SqlParameter>();
-            parametros.Add(new SqlParameter("@cCDGPED", cCDGPED));
-            parametros.Add(new SqlParameter("@cNome_Arquivo", cNome_Arquivo));
+            parametros.Add(new SqlParameter("@icdgped", cCDGPED));
+            parametros.Add(new SqlParameter("@vnome_arquivo", cNome_Arquivo));
             parametros.Add(new SqlParameter("@cCodProd", cCodProd));
-            parametros.Add(new SqlParameter("@cCodItem", cCodItem));
+            parametros.Add(new SqlParameter("@iCodItem", cCodItem));
             parametros.Add(new SqlParameter("@cCGCF", cCGCF));
 
             try
