@@ -474,7 +474,6 @@ namespace WebsupplyEmar.API.Controllers
                                                                                 JWT_CLAIMS.CDGPED,
                                                                                 nomeOriginal,
                                                                                 JWT_CLAIMS.CODPROD,
-                                                                                JWT_CLAIMS.CODITEM,
                                                                                 JWT_CLAIMS.CGCF))
                                                                             {
                                                                                 // Gera o Log de operação do Robô

@@ -123,7 +123,7 @@ namespace WebsupplyEmar.Dados.ADO
             }
         }
 
-        public static bool PROCESSA_ANEXO_PEDIDOITENS(string Connection, string cCDGPED, string cNome_Arquivo, string cCodProd, string cCodItem, string cCGCF)
+        public static bool PROCESSA_ANEXO_PEDIDOITENS(string Connection, string cCDGPED, string cNome_Arquivo, string cCodProd, string cCGCF)
         {
             ConexaoSQLServer Conn = new ConexaoSQLServer(Connection);
 
@@ -133,7 +133,6 @@ namespace WebsupplyEmar.Dados.ADO
             parametros.Add(new SqlParameter("@icdgped", cCDGPED));
             parametros.Add(new SqlParameter("@vnome_arquivo", cNome_Arquivo));
             parametros.Add(new SqlParameter("@cCodProd", cCodProd));
-            parametros.Add(new SqlParameter("@iCodItem", cCodItem));
             parametros.Add(new SqlParameter("@cCGCF", cCGCF));
 
             try
