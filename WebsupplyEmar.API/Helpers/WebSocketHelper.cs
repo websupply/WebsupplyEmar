@@ -33,6 +33,15 @@ namespace WebsupplyEmar.API.Helpers
         public WebSocket Conector { get; set; }
     }
 
+    // Classe Responsável Pelas Informações do Websocket
+    public class WebSocketInfo
+    {
+        public string Host { get; set; }
+        public DateTime DataHorarioInicio { get; set; }
+        public DateTime DataHorarioFim { get; set; }
+        public bool ServidorOnline { get; set; }
+    }
+
     // Classe Responsável por Gerenciar o WebSocketHelper
     public class WebSocketHelper
     {
