@@ -40,6 +40,14 @@ namespace WebsupplyEmar.API.Helpers
         public DateTime DataHorarioInicio { get; set; }
         public DateTime DataHorarioFim { get; set; }
         public bool ServidorOnline { get; set; }
+        public WebSocketInfoSSL SSL { get; set; }
+    }
+
+    public class WebSocketInfoSSL
+    {
+        public string Hash { get; set; }
+        public DateTime InicioValidade { get; set; }
+        public DateTime FimValidade { get; set; }
     }
 
     // Classe Responsável por Gerenciar o WebSocketHelper

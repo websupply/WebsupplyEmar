@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Graph.Models.Security;
+using System.Security.Cryptography.X509Certificates;
 using WebsupplyEmar.API.Helpers;
 
 namespace WebsupplyEmar.API.Controllers
@@ -42,12 +44,21 @@ namespace WebsupplyEmar.API.Controllers
                 string Servidor = _configuration.GetValue<string>("WebSockets:Host");
                 string Porta = ":" + (Request.Scheme == "https" ? _configuration.GetValue<string>("WebSockets:PortaSSL") : _configuration.GetValue<string>("WebSockets:Porta")) + "/";
 
+                // Pega os Dados do SSL
+                X509Certificate2 certSSL = SSLHelper.ConsultaHashCertificado(Servidor);
+
                 // Seta os Dados do Servidor
                 _webSocketInfo = new WebSocketInfo
                 {
                     Host = Prefixo + Servidor + Porta,
                     DataHorarioInicio = DateTime.Now,
-                    ServidorOnline = true
+                    ServidorOnline = true,
+                    SSL = new WebSocketInfoSSL
+                    {
+                        Hash = BitConverter.ToString(certSSL.GetCertHash()).Replace("-", ""),
+                        InicioValidade = certSSL.NotBefore,
+                        FimValidade = certSSL.NotAfter
+                    }
                 };
 
                 // Inicia o Servidor
@@ -59,38 +70,106 @@ namespace WebsupplyEmar.API.Controllers
 
                 if (success)
                 {
-                    return Ok();
+                    // Retorna a consulta
+                    return APIResponseHelper.EstruturaResponse(
+                        "Sucesso",
+                        "O Servidor foi iniciado e sua execução foi finalizada com sucesso",
+                        "success",
+                        null,
+                        200,
+                        Url.Action("fecha_servidor", "WebSocket", null, Request.Scheme));
                 }
                 else
                 {
-                    return StatusCode(500, "Falha ao iniciar o servidor WebSocket");
+                    // Retorna a consulta
+                    return APIResponseHelper.EstruturaResponse(
+                        "Ops",
+                        "Erro ao iniciar o servidor websocket",
+                        "error",
+                        null,
+                        400,
+                        Url.Action("fecha_servidor", "WebSocket", null, Request.Scheme));
                 }
             }
             else
             {
-                return StatusCode(400, "O Servidor já foi inicializado");
+                // Retorna a consulta
+                return APIResponseHelper.EstruturaResponse(
+                    "Ops",
+                    "O Servidor já foi inicializado",
+                    "error",
+                    null,
+                    400,
+                    Url.Action("fecha_servidor", "WebSocket", null, Request.Scheme));
             }
         }
 
         [HttpGet("fecha_servidor")]
         public async Task<IActionResult> FechaServidor()
         {
-            // Define o Servidor
-            string Prefixo = Request.Scheme == "https" ? "https://" : "http://";
-            string Servidor = _configuration.GetValue<string>("WebSockets:Host");
-            string Porta = ":" + (Request.Scheme == "https" ? _configuration.GetValue<string>("WebSockets:PortaSSL") : _configuration.GetValue<string>("WebSockets:Porta")) + "/";
-
-            // Para o Servidor
-            bool success = await _webSocketHelper.FechaServidor(Prefixo + Servidor + Porta);
-
-            if (success)
+            // Verifica se o Servidor foi inicializado realiza o encerramento, caso não
+            // retorna mensagem de erro
+            if (_webSocketInfo.ServidorOnline)
             {
-                return Ok();
+                // Define o Servidor
+                string Prefixo = Request.Scheme == "https" ? "https://" : "http://";
+                string Servidor = _configuration.GetValue<string>("WebSockets:Host");
+                string Porta = ":" + (Request.Scheme == "https" ? _configuration.GetValue<string>("WebSockets:PortaSSL") : _configuration.GetValue<string>("WebSockets:Porta")) + "/";
+
+                // Para o Servidor
+                bool success = await _webSocketHelper.FechaServidor(Prefixo + Servidor + Porta);
+
+                // Atualiza os Dados do Servidor
+                _webSocketInfo.DataHorarioFim = DateTime.Now;
+                _webSocketInfo.ServidorOnline = false;
+
+                if (success)
+                {
+                    // Retorna a consulta
+                    return APIResponseHelper.EstruturaResponse(
+                        "Sucesso",
+                        "O Servidor foi finalizado com sucesso",
+                        "success",
+                        null,
+                        200,
+                        Url.Action("fecha_servidor", "WebSocket", null, Request.Scheme));
+                }
+                else
+                {
+                    // Retorna a consulta
+                    return APIResponseHelper.EstruturaResponse(
+                        "Ops",
+                        "Erro ao finalizar o servidor websocket",
+                        "error",
+                        null,
+                        400,
+                        Url.Action("fecha_servidor", "WebSocket", null, Request.Scheme));
+                }
             }
             else
             {
-                return StatusCode(500, "Falha ao fechar o servidor WebSocket");
+                // Retorna a consulta
+                return APIResponseHelper.EstruturaResponse(
+                    "Ops",
+                    "O Servidor já foi encerrado",
+                    "error",
+                    null,
+                    400,
+                    Url.Action("fecha_servidor", "WebSocket", null, Request.Scheme));
             }
+        }
+
+        [HttpGet("info_servidor")]
+        public async Task<IActionResult> InfoServidor()
+        {
+            // Retorna a consulta
+            return APIResponseHelper.EstruturaResponse(
+                "Sucesso",
+                "Informações do Servidor WebSocket Consultadas com Sucesso",
+                "success",
+                _webSocketInfo,
+                200,
+                Url.Action("info_servidor", "WebSocket", null, Request.Scheme));
         }
     }
 }
