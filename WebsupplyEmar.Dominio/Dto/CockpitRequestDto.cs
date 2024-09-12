@@ -9,7 +9,6 @@ namespace WebsupplyEmar.Dominio.Dto
 {
     public class CockpitRequestDto : DataTableModel
     {
-        public int Draw { get; set; }
         public List<ColumnDto> Columns { get; set; }
         public List<OrderDto> Order { get; set; }
         public SearchDto Search { get; set; }

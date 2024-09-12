@@ -33,23 +33,32 @@ namespace WebsupplyEmar.API.Controllers
         }
 
         [HttpPost]
-        [Route("gerar_hash")]
-        public ObjectResult GERAR_HASH(ClaimsModel objClaimsRequest)
+        [Route("inicio")]
+        public ObjectResult Inicio(CockpitRequestDto objRequest)
         {
-            // Gera o retorno
-            object Retorno = new
-            {
-                Token = "[]"
-            };
+            // Cria o Objeto de Resposta
+            CockpitResponseDto objResponse = new CockpitResponseDto();
+
+            // Consulta os Cards
+            objResponse = CockpitADO.CONSULTA_CARDS(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
+
+            // Consulta os Logs do Websocket
+            objResponse = CockpitADO.CONSULTA_WEBSOCKET_LOGS(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
+
+            // Consulta os Logs do Robô
+            objResponse = CockpitADO.CONSULTA_EMAR_LOGS(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
+
+            // Consulta os Logs de Processamento do Robô
+            objResponse = CockpitADO.CONSULTA_EMAR_LOGS_PROCESSAMENTO(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
 
             // Retorna a consulta
             return APIResponseHelper.EstruturaResponse(
                 "Sucesso",
-                "Token Gerado com Sucesso",
+                "Dados do Cockpit Gerados com Sucesso",
                 "success",
-                Retorno,
+                objResponse,
                 200,
-                Url.Action("gerar_hash", "Emar", null, Request.Scheme));
+                Url.Action("inicio", "Cockpit", null, Request.Scheme));
         }
 
         //[HttpPost]
