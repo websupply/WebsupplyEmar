@@ -64,6 +64,10 @@ namespace WebsupplyEmar.Dados.ADO
                 {
                     while (reader.Read())
                     {
+                        // Atualiza o Total de Pagina
+                        objResponse.RecordsTotal = int.Parse(reader["total_registros"].ToString().Trim());
+                        objResponse.RecordsFiltered = objResponse.RecordsTotal;
+
                         CockpitResponseDto.LogsWebsocket log = new CockpitResponseDto.LogsWebsocket
                         {
                             Log = reader["LOG"].ToString().Trim().ToUpper(),
@@ -101,6 +105,10 @@ namespace WebsupplyEmar.Dados.ADO
                 {
                     while (reader.Read())
                     {
+                        // Atualiza o Total de Pagina
+                        objResponse.RecordsTotal = int.Parse(reader["total_registros"].ToString().Trim());
+                        objResponse.RecordsFiltered = objResponse.RecordsTotal;
+
                         CockpitResponseDto.LogsEmar log = new CockpitResponseDto.LogsEmar
                         {
                             Log = reader["LOG"].ToString().Trim().ToUpper(),
@@ -142,7 +150,6 @@ namespace WebsupplyEmar.Dados.ADO
                         objResponse.RecordsTotal = int.Parse(reader["total_registros"].ToString().Trim());
                         objResponse.RecordsFiltered = objResponse.RecordsTotal;
 
-                        // Log de Processamento
                         CockpitResponseDto.LogsEmarProcessamento log = new CockpitResponseDto.LogsEmarProcessamento
                         {
                             Log = reader["DESCRICAO_LOG"].ToString().Trim().ToUpper(),
