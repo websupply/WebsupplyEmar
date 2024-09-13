@@ -135,12 +135,6 @@ namespace WebsupplyEmar.API.Controllers
             // Consulta os Logs de Processamento do Robô
             objResponse = CockpitADO.CONSULTA_EMAR_LOGS_PROCESSAMENTO(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
 
-            // Monta o Retorno
-            object result = new
-            {
-                _logsEmarProcessamento = objResponse.logsEmarProcessamento
-            };
-
             // Dados Meta
             object meta = new
             {
@@ -155,7 +149,7 @@ namespace WebsupplyEmar.API.Controllers
                 "Sucesso",
                 "Logs de Processamento do Robô Consultados com Sucesso",
                 "success",
-                result,
+                objResponse.logsEmarProcessamento,
                 meta,
                 200,
                 Url.Action("logs_emar_processamentos", "Cockpit", null, Request.Scheme));
