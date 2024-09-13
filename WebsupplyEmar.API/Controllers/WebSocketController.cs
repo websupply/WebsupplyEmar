@@ -2,6 +2,7 @@
 using Microsoft.Graph.Models.Security;
 using System.Security.Cryptography.X509Certificates;
 using WebsupplyEmar.API.Helpers;
+using WebsupplyEmar.API.Services;
 
 namespace WebsupplyEmar.API.Controllers
 {
@@ -9,16 +10,18 @@ namespace WebsupplyEmar.API.Controllers
     [ApiController]
     public class WebSocketController : Controller
     {
+        private readonly IWebSocketService _webSocketService;
         private readonly IConfiguration _configuration;
         private readonly WebSocketHelper _webSocketHelper;
         
         // Dados do Websocket
         private static WebSocketInfo _webSocketInfo = new WebSocketInfo();
 
-        public WebSocketController(WebSocketHelper webSocketHelper, IConfiguration configuration)
+        public WebSocketController(WebSocketHelper webSocketHelper, IConfiguration configuration, IWebSocketService webSocketService)
         {
             _webSocketHelper = webSocketHelper;
             _configuration = configuration;
+            _webSocketService = webSocketService;
 
             // Define a string de Conexão com o Banco para Gerar os Logs
             _webSocketHelper.DefineConexaoBD(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"));
@@ -61,12 +64,18 @@ namespace WebsupplyEmar.API.Controllers
                     }
                 };
 
+                // Seta o Objeto local no serviço 
+                _webSocketService.SetWebSocketInfo(_webSocketInfo);
+
                 // Inicia o Servidor
                 bool success = await _webSocketHelper.IniciaServidor(Prefixo + Servidor + Porta);
 
                 // Atualiza os Dados do Servidor
                 _webSocketInfo.DataHorarioFim = DateTime.Now;
                 _webSocketInfo.ServidorOnline = false;
+
+                // Seta o Objeto local no serviço 
+                _webSocketService.SetWebSocketInfo(_webSocketInfo);
 
                 if (success)
                 {
@@ -122,6 +131,9 @@ namespace WebsupplyEmar.API.Controllers
                 // Atualiza os Dados do Servidor
                 _webSocketInfo.DataHorarioFim = DateTime.Now;
                 _webSocketInfo.ServidorOnline = false;
+
+                // Seta o Objeto local no serviço 
+                _webSocketService.SetWebSocketInfo(_webSocketInfo);
 
                 if (success)
                 {

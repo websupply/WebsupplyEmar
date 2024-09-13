@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using WebsupplyEmar.API.Helpers;
+using WebsupplyEmar.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,7 @@ builder.Services.AddControllers()
 
 // Add WebSocketHelper to the container
 builder.Services.AddSingleton<WebSocketHelper>();
+builder.Services.AddSingleton<IWebSocketService, WebSocketService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -18,6 +18,7 @@ using System.Text;
 using System.Text.Json;
 using Newtonsoft.Json;
 using System.Security.Cryptography.X509Certificates;
+using WebsupplyEmar.API.Services;
 
 namespace WebsupplyEmar.API.Controllers
 {
@@ -25,11 +26,13 @@ namespace WebsupplyEmar.API.Controllers
     [ApiController]
     public class CockpitController : Controller
     {
+        private readonly IWebSocketService _webSocketService;
         private readonly IConfiguration _configuration;
 
-        public CockpitController(IConfiguration configuration)
+        public CockpitController(IConfiguration configuration, IWebSocketService webSocketService)
         {
             _configuration = configuration;
+            _webSocketService = webSocketService;
         }
 
         [HttpPost]
@@ -56,6 +59,13 @@ namespace WebsupplyEmar.API.Controllers
 
             // Consulta os Logs de Processamento do Robô
             objResponse = CockpitADO.CONSULTA_EMAR_LOGS_PROCESSAMENTO(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
+
+            // Monta o Retorno
+            object result = new
+            {
+                _infoCockpit = objResponse,
+                _infoWebSocket = _webSocketService.GetWebSocketInfo()
+            };
 
             // Retorna a consulta
             return APIResponseHelper.EstruturaResponse(
