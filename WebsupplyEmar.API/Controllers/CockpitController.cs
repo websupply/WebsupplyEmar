@@ -72,7 +72,7 @@ namespace WebsupplyEmar.API.Controllers
                 "Sucesso",
                 "Dados do Cockpit Gerados com Sucesso",
                 "success",
-                objResponse,
+                result,
                 200,
                 Url.Action("inicio", "Cockpit", null, Request.Scheme));
         }
