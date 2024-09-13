@@ -37,7 +37,13 @@ namespace WebsupplyEmar.API.Controllers
         public ObjectResult Inicio(CockpitRequestDto objRequest)
         {
             // Cria o Objeto de Resposta
-            CockpitResponseDto objResponse = new CockpitResponseDto();
+            CockpitResponseDto objResponse = new CockpitResponseDto
+            {
+                card = new List<CockpitResponseDto.Card>(),
+                logsEmar = new List<CockpitResponseDto.LogsEmar>(),
+                logsEmarProcessamento = new List<CockpitResponseDto.LogsEmarProcessamento>(),
+                logsWebsocket = new List<CockpitResponseDto.LogsWebsocket>()
+            };
 
             // Consulta os Cards
             objResponse = CockpitADO.CONSULTA_CARDS(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
