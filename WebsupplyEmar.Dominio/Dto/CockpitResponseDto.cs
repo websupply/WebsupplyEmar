@@ -12,9 +12,9 @@ namespace WebsupplyEmar.Dominio.Dto
         public List<Card> card { get; set; }
         public string TotalMensagensRecebidas { get; set; }
         public string TotalConexoesUltimaHora { get; set; }
-        public List<LogsEmar> logsEmar { get; set; } = new List<LogsEmar>();
-        public List<LogsEmarProcessamento> logsEmarProcessamento { get; set; } = new List<LogsEmarProcessamento>();
-        public List<LogsWebsocket> logsWebsocket { get; set; } = new List<LogsWebsocket>();
+        public List<LogsEmar> logsEmar { get; set; }
+        public List<LogsEmarProcessamento> logsEmarProcessamento { get; set; }
+        public List<LogsWebsocket> logsWebsocket { get; set; }
 
         // Classes de Retorno
         public class Card
