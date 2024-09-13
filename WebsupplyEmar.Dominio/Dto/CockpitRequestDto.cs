@@ -14,9 +14,6 @@ namespace WebsupplyEmar.Dominio.Dto
         public SearchDto? Search { get; set; } = new SearchDto();
         public int? Start { get; set; }
         public int? Length { get; set; }
-        public int? Pages { get; set; }
-        public int? RecordsFiltered { get; set; }
-        public int? RecordsTotal { get; set; }
         public DateTime periodoInicio { get; set; }
         public DateTime periodoFim { get; set; }
     }

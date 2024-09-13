@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WebsupplyEmar.Dominio.Model;
 
 namespace WebsupplyEmar.Dominio.Dto
 {
-    public class CockpitResponseDto
+    public class CockpitResponseDto : DataTableModel
     {
         // Parametros de Acesso
         public List<Card> card { get; set; }
@@ -15,6 +16,11 @@ namespace WebsupplyEmar.Dominio.Dto
         public List<LogsEmar> logsEmar { get; set; } = new List<LogsEmar>() { new LogsEmar() };
         public List<LogsEmarProcessamento> logsEmarProcessamento { get; set; } = new List<LogsEmarProcessamento>() { new LogsEmarProcessamento() };
         public List<LogsWebsocket> logsWebsocket { get; set; } = new List<LogsWebsocket>() { new LogsWebsocket() };
+
+        // Parametros do DataTable
+        public int? Pages { get; set; }
+        public int? RecordsFiltered { get; set; }
+        public int? RecordsTotal { get; set; }
 
         // Classes de Retorno
         public class Card
