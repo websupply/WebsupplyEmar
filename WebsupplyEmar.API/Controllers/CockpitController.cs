@@ -153,7 +153,7 @@ namespace WebsupplyEmar.API.Controllers
 
         [HttpPost]
         [Route("servidor_websocket")]
-        public ObjectResult Servidor_WebSocket(CockpitRequestDto objRequest)
+        public ObjectResult Servidor_WebSocket()
         {
             // Monta o Retorno
             object result = new
