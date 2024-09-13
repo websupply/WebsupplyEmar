@@ -36,35 +36,22 @@ namespace WebsupplyEmar.API.Controllers
         }
 
         [HttpPost]
-        [Route("inicio")]
-        public ObjectResult Inicio(CockpitRequestDto objRequest)
+        [Route("cards")]
+        public ObjectResult Cards(CockpitRequestDto objRequest)
         {
             // Cria o Objeto de Resposta
             CockpitResponseDto objResponse = new CockpitResponseDto
             {
-                card = new List<CockpitResponseDto.Card>(),
-                logsEmar = new List<CockpitResponseDto.LogsEmar>(),
-                logsEmarProcessamento = new List<CockpitResponseDto.LogsEmarProcessamento>(),
-                logsWebsocket = new List<CockpitResponseDto.LogsWebsocket>()
+                card = new List<CockpitResponseDto.Card>()
             };
 
             // Consulta os Cards
             objResponse = CockpitADO.CONSULTA_CARDS(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
 
-            // Consulta os Logs do Websocket
-            objResponse = CockpitADO.CONSULTA_WEBSOCKET_LOGS(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
-
-            // Consulta os Logs do Robô
-            objResponse = CockpitADO.CONSULTA_EMAR_LOGS(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
-
-            // Consulta os Logs de Processamento do Robô
-            objResponse = CockpitADO.CONSULTA_EMAR_LOGS_PROCESSAMENTO(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
-
             // Monta o Retorno
             object result = new
             {
-                _infoCockpit = objResponse,
-                _infoWebSocket = _webSocketService.GetWebSocketInfo()
+                _card = objResponse.card
             };
 
             // Retorna a consulta
@@ -75,6 +62,113 @@ namespace WebsupplyEmar.API.Controllers
                 result,
                 200,
                 Url.Action("inicio", "Cockpit", null, Request.Scheme));
+        }
+
+        [HttpPost]
+        [Route("logs_emar")]
+        public ObjectResult Logs_Emar(CockpitRequestDto objRequest)
+        {
+            // Cria o Objeto de Resposta
+            CockpitResponseDto objResponse = new CockpitResponseDto
+            {
+                logsEmar = new List<CockpitResponseDto.LogsEmar>()
+            };
+
+            // Consulta os Logs do Robô
+            objResponse = CockpitADO.CONSULTA_EMAR_LOGS(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
+
+            // Monta o Retorno
+            object result = new
+            {
+                _logsEmar = objResponse.logsEmar
+            };
+
+            // Retorna a consulta
+            return APIResponseHelper.EstruturaResponse(
+                "Sucesso",
+                "Logs do Emar Consultados com Sucesso",
+                "success",
+                result,
+                200,
+                Url.Action("logs_emar", "Cockpit", null, Request.Scheme));
+        }
+
+        [HttpPost]
+        [Route("logs_websocket")]
+        public ObjectResult Logs_WebSocket(CockpitRequestDto objRequest)
+        {
+            // Cria o Objeto de Resposta
+            CockpitResponseDto objResponse = new CockpitResponseDto
+            {
+                logsWebsocket = new List<CockpitResponseDto.LogsWebsocket>()
+            };
+
+            // Consulta os Logs do Websocket
+            objResponse = CockpitADO.CONSULTA_WEBSOCKET_LOGS(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
+
+            // Monta o Retorno
+            object result = new
+            {
+                _logsWebsocket = objResponse.logsWebsocket
+            };
+
+            // Retorna a consulta
+            return APIResponseHelper.EstruturaResponse(
+                "Sucesso",
+                "Logs do WebSocket Consultados com Sucesso",
+                "success",
+                result,
+                200,
+                Url.Action("logs_websocket", "Cockpit", null, Request.Scheme));
+        }
+
+        [HttpPost]
+        [Route("logs_emar_processamentos")]
+        public ObjectResult Logs_Emar_Processamento(CockpitRequestDto objRequest)
+        {
+            // Cria o Objeto de Resposta
+            CockpitResponseDto objResponse = new CockpitResponseDto
+            {
+                logsEmarProcessamento = new List<CockpitResponseDto.LogsEmarProcessamento>()
+            };
+
+            // Consulta os Logs de Processamento do Robô
+            objResponse = CockpitADO.CONSULTA_EMAR_LOGS_PROCESSAMENTO(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
+
+            // Monta o Retorno
+            object result = new
+            {
+                _logsEmarProcessamento = objResponse.logsEmarProcessamento
+            };
+
+            // Retorna a consulta
+            return APIResponseHelper.EstruturaResponse(
+                "Sucesso",
+                "Logs de Processamento do Robô Consultados com Sucesso",
+                "success",
+                result,
+                200,
+                Url.Action("logs_emar_processamentos", "Cockpit", null, Request.Scheme));
+        }
+
+        [HttpPost]
+        [Route("servidor_websocket")]
+        public ObjectResult Servidor_WebSocket(CockpitRequestDto objRequest)
+        {
+            // Monta o Retorno
+            object result = new
+            {
+                _infoWebSocket = _webSocketService.GetWebSocketInfo()
+            };
+
+            // Retorna a consulta
+            return APIResponseHelper.EstruturaResponse(
+                "Sucesso",
+                "Dados do Servidor WebSocket Carregados com Sucesso",
+                "success",
+                result,
+                200,
+                Url.Action("servidor_websocket", "Cockpit", null, Request.Scheme));
         }
 
         //[HttpPost]

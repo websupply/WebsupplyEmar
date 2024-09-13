@@ -8,6 +8,7 @@ namespace WebsupplyEmar.Dominio.Model
 {
     public class DataTableModel
     {
+        public int? Draw { get; set; }
         public List<ColumnDto>? Columns { get; set; }
         public List<OrderDto>? Order { get; set; }
         public SearchDto? Search { get; set; }
