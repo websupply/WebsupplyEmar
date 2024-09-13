@@ -12,9 +12,6 @@ namespace WebsupplyEmar.Dados.ADO
     {
         public static CockpitResponseDto CONSULTA_CARDS(string Connection, CockpitRequestDto objRequest, CockpitResponseDto objResponse)
         {
-            // Instância a Lista
-            objResponse.card = new List<CockpitResponseDto.Card>();
-
             // Faz a consutla dos dados da Solicitação de Pagamento
             ConexaoSQLServer Conn = new ConexaoSQLServer(Connection);
 
@@ -49,9 +46,6 @@ namespace WebsupplyEmar.Dados.ADO
 
         public static CockpitResponseDto CONSULTA_WEBSOCKET_LOGS(string Connection, CockpitRequestDto objRequest, CockpitResponseDto objResponse)
         {
-            // Instância a Lista
-            objResponse.logsWebsocket = new List<CockpitResponseDto.LogsWebsocket>();
-
             // Faz a consutla dos dados da Solicitação de Pagamento
             ConexaoSQLServer Conn = new ConexaoSQLServer(Connection);
 
@@ -89,9 +83,6 @@ namespace WebsupplyEmar.Dados.ADO
 
         public static CockpitResponseDto CONSULTA_EMAR_LOGS(string Connection, CockpitRequestDto objRequest, CockpitResponseDto objResponse)
         {
-            // Instância a Lista
-            objResponse.logsEmar = new List<CockpitResponseDto.LogsEmar>();
-
             // Faz a consutla dos dados da Solicitação de Pagamento
             ConexaoSQLServer Conn = new ConexaoSQLServer(Connection);
 
@@ -129,9 +120,6 @@ namespace WebsupplyEmar.Dados.ADO
 
         public static CockpitResponseDto CONSULTA_EMAR_LOGS_PROCESSAMENTO(string Connection, CockpitRequestDto objRequest, CockpitResponseDto objResponse)
         {
-            // Instância a Lista
-            objResponse.logsEmarProcessamento = new List<CockpitResponseDto.LogsEmarProcessamento>();
-
             // Faz a consutla dos dados da Solicitação de Pagamento
             ConexaoSQLServer Conn = new ConexaoSQLServer(Connection);
 
