@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WebsupplyEmar.Dominio.Model;
 
 namespace WebsupplyEmar.Dominio.Dto
 {
-    public class CockpitResponseDto
+    public class CockpitResponseDto : DataTableModel
     {
         // Parametros de Acesso
         public List<Card> card { get; set; }

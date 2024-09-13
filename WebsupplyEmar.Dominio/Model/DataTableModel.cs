@@ -14,6 +14,9 @@ namespace WebsupplyEmar.Dominio.Model
         public SearchDto? Search { get; set; }
         public int? Start { get; set; }
         public int? Length { get; set; }
+        public int? Pages { get; set; }
+        public int? RecordsFiltered { get; set; }
+        public int? RecordsTotal { get; set; }
 
         public class ColumnDto
         {

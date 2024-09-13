@@ -141,12 +141,22 @@ namespace WebsupplyEmar.API.Controllers
                 _logsEmarProcessamento = objResponse.logsEmarProcessamento
             };
 
+            // Dados Meta
+            object meta = new
+            {
+                draw = objRequest.Draw,
+                pages = objResponse.RecordsTotal / objRequest.Length,
+                recordsFiltered = objResponse.RecordsFiltered,
+                recordsTotal = objResponse.RecordsTotal,
+            };
+
             // Retorna a consulta
-            return APIResponseHelper.EstruturaResponse(
+            return APIResponseHelper.EstruturaResponseDataTable(
                 "Sucesso",
                 "Logs de Processamento do Robô Consultados com Sucesso",
                 "success",
                 result,
+                meta,
                 200,
                 Url.Action("logs_emar_processamentos", "Cockpit", null, Request.Scheme));
         }
