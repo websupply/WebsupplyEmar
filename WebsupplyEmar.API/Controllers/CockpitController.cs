@@ -77,18 +77,22 @@ namespace WebsupplyEmar.API.Controllers
             // Consulta os Logs do Robô
             objResponse = CockpitADO.CONSULTA_EMAR_LOGS(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
 
-            // Monta o Retorno
-            object result = new
+            // Dados Meta
+            object meta = new
             {
-                _logsEmar = objResponse.logsEmar
+                draw = objRequest.Draw,
+                pages = objResponse.RecordsTotal / objRequest.Length,
+                recordsFiltered = objResponse.RecordsFiltered,
+                recordsTotal = objResponse.RecordsTotal,
             };
 
             // Retorna a consulta
-            return APIResponseHelper.EstruturaResponse(
+            return APIResponseHelper.EstruturaResponseDataTable(
                 "Sucesso",
                 "Logs do Emar Consultados com Sucesso",
                 "success",
-                result,
+                objResponse.logsEmar,
+                meta,
                 200,
                 Url.Action("logs_emar", "Cockpit", null, Request.Scheme));
         }
@@ -106,18 +110,22 @@ namespace WebsupplyEmar.API.Controllers
             // Consulta os Logs do Websocket
             objResponse = CockpitADO.CONSULTA_WEBSOCKET_LOGS(_configuration.GetValue<string>("ConnectionStrings:DefaultConnection"), objRequest, objResponse);
 
-            // Monta o Retorno
-            object result = new
+            // Dados Meta
+            object meta = new
             {
-                _logsWebsocket = objResponse.logsWebsocket
+                draw = objRequest.Draw,
+                pages = objResponse.RecordsTotal / objRequest.Length,
+                recordsFiltered = objResponse.RecordsFiltered,
+                recordsTotal = objResponse.RecordsTotal,
             };
 
             // Retorna a consulta
-            return APIResponseHelper.EstruturaResponse(
+            return APIResponseHelper.EstruturaResponseDataTable(
                 "Sucesso",
                 "Logs do WebSocket Consultados com Sucesso",
                 "success",
-                result,
+                objResponse.logsWebsocket,
+                meta,
                 200,
                 Url.Action("logs_websocket", "Cockpit", null, Request.Scheme));
         }
