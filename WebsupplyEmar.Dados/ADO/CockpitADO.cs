@@ -152,6 +152,9 @@ namespace WebsupplyEmar.Dados.ADO
 
                         CockpitResponseDto.LogsEmarProcessamento log = new CockpitResponseDto.LogsEmarProcessamento
                         {
+                            Email = reader["EMAIL"].ToString().Trim().ToUpper(),
+                            Anexo = reader["ANEXO"].ToString().Trim().ToUpper(),
+                            Status = reader["STATUS"].ToString().Trim().ToUpper(),
                             Log = reader["DESCRICAO_LOG"].ToString().Trim().ToUpper(),
                             DataHorario = reader["DATAHORARIO_PROCESSAMENTO"].ToString().Trim()
                         };

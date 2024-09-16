@@ -37,6 +37,9 @@ namespace WebsupplyEmar.Dominio.Dto
 
         public class LogsEmarProcessamento
         {
+            public string Email { get; set; }
+            public string Anexo { get; set; }
+            public string Status { get; set; }
             public string Log { get; set; }
             public string DataHorario { get; set; }
         }
