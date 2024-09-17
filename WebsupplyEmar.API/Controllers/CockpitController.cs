@@ -37,6 +37,14 @@ namespace WebsupplyEmar.API.Controllers
             _webSocketService = webSocketService;
         }
 
+        [HttpGet]
+        public IActionResult Index()
+        {
+            // Caminho para o arquivo index.html dentro da pasta wwwroot
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
+            return PhysicalFile(filePath, "text/html");
+        }
+
         [HttpPost]
         [Route("cards")]
         public ObjectResult Cards(CockpitRequestDto objRequest)

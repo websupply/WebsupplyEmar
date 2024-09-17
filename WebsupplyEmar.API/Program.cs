@@ -71,6 +71,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Permitir o uso de arquivos estáticos
+app.UseStaticFiles();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
