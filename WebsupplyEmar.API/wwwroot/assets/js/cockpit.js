@@ -261,7 +261,7 @@ function CarregaLogsEmarProcessamento(){
 								// Seleciona o Icone e a cor do anexo
 								switch(extensao){
 									// Excel
-									case "xls": case "xlsm": case "xlsb": case "xltx":
+									case "xls": case "xlsm": case "xlsb": case "xltx": case "xlsx":
 										var icone = 'far fa-file-excel'
 										var cor = 'bg-success';
 										break;
