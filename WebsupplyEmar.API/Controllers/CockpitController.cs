@@ -19,6 +19,8 @@ using System.Text.Json;
 using Newtonsoft.Json;
 using System.Security.Cryptography.X509Certificates;
 using WebsupplyEmar.API.Services;
+using Microsoft.Graph.Models.Security;
+using Tavis.UriTemplates;
 
 namespace WebsupplyEmar.API.Controllers
 {
@@ -164,7 +166,7 @@ namespace WebsupplyEmar.API.Controllers
         }
 
         [HttpPost]
-        [Route("servidor_websocket")]
+        [Route("dados_servidor_websocket")]
         public ObjectResult Servidor_WebSocket()
         {
             // Monta o Retorno
@@ -180,7 +182,41 @@ namespace WebsupplyEmar.API.Controllers
                 "success",
                 result,
                 200,
-                Url.Action("servidor_websocket", "Cockpit", null, Request.Scheme));
+                Url.Action("dados_servidor_websocket", "Cockpit", null, Request.Scheme));
+        }
+
+        [HttpPost]
+        [Route("dados_ambiente")]
+        public ObjectResult Dados_Ambiente()
+        {
+            string host = Request.Host.Host;
+
+            X509Certificate2 certSSL = SSLHelper.ConsultaHashCertificado(host);
+
+            // Gera o retorno
+            object result = new
+            {
+                _infoAmbiente = new
+                {
+                    Host = host,
+                    SSL = new
+                    {
+                        Hash = BitConverter.ToString(certSSL.GetCertHash()).Replace("-", ""),
+                        InicioValidade = certSSL.NotBefore,
+                        FimValidade = certSSL.NotAfter
+
+                    }
+                }
+            };
+
+            // Retorna a consulta
+            return APIResponseHelper.EstruturaResponse(
+                "Sucesso",
+                "Dados do Ambiente Carregados com Sucesso",
+                "success",
+                result,
+                200,
+                Url.Action("dados_ambiente", "Cockpit", null, Request.Scheme));
         }
 
         //[HttpPost]
