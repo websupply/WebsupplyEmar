@@ -1,517 +1,538 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>WsEmar - Cockpit</title>
+    <!-- Inicio do Script para Corrigir todos os caminhos SRC e HREF -->
+    <script>
+        // Fix para Caso seja em algum ambiente diferente de localhost
+        const ambiente = (window.location.host).indexOf("localhost") == -1 ? "/WSEmaR" : "";
 
-  <!-- Favicons -->
-  <link href="/WSEmaR/dist/img/favicon.png" rel="icon">
-  <link href="/WSEmaR/dist/img/favicon.png" rel="apple-touch-icon">
+        // Função para Ajustar os Caminhos hrefs e src
+        var ajustarCaminho = (elemento, atributo) => {
+            var caminhoOriginal = elemento.getAttribute(atributo);
 
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- SweetAlert2 -->
-  <link rel="stylesheet" href="/WSEmaR/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="/WSEmaR/plugins/fontawesome-free/css/all.min.css">
-  <!-- overlayScrollbars -->
-  <link rel="stylesheet" href="/WSEmaR/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
-  <!-- Theme style -->
-  <link rel="stylesheet" href="/WSEmaR/dist/css/adminlte.min.css">
-  <!-- daterange picker -->
-  <link rel="stylesheet" href="/WSEmaR/plugins/daterangepicker/daterangepicker.css">
-  <!-- Tempusdominus Bootstrap 4 -->
-  <link rel="stylesheet" href="/WSEmaR/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
-  <!-- DataTables -->
-  <link rel="stylesheet" href="/WSEmaR/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
-  <link rel="stylesheet" href="/WSEmaR/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+            if (caminhoOriginal.indexOf("https://") == -1 && caminhoOriginal.indexOf("http://") == -1) {
+                if (caminhoOriginal && caminhoOriginal.startsWith('/')) {
+                    elemento.setAttribute(atributo, `${ambiente}${caminhoOriginal}`);
+                }
+            }
+        }
 
-  <!-- REQUIRED SCRIPTS -->
-  <!-- jQuery -->
-  <script src="/WSEmaR/plugins/jquery/jquery.min.js"></script>
-  <!-- Bootstrap 4 -->
-  <script src="/WSEmaR/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <!-- SweetAlert2 -->
-  <script src="/WSEmaR/plugins/sweetalert2/sweetalert2.min.js"></script>
-  <!-- Toastr -->
-  <script src="/WSEmaR/plugins/toastr/toastr.min.js"></script>
-  <!-- overlayScrollbars -->
-  <script src="/WSEmaR/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
-  <!-- AdminLTE App -->
-  <script src="/WSEmaR/dist/js/adminlte.js"></script>
-  
-  <!-- daterangepicker -->
-  <script src="/WSEmaR/plugins/moment/moment.min.js"></script>
-  <script src="/WSEmaR/plugins/moment/locales.min.js"></script>
-  <script src="/WSEmaR/plugins/moment/moment-with-locales.min.js"></script>
-  <script src="/WSEmaR/plugins/daterangepicker/daterangepicker.js"></script>
+        // Ajustar todos os <link> e <script> com href/src
+        document.querySelectorAll('link[href], script[src]').forEach(el => {
+            ajustarCaminho(el, el.hasAttribute('href') ? 'href' : 'src');
+        });
 
-  <!-- Tempusdominus Bootstrap 4 -->
-  <script src="/WSEmaR/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+        // Ajustar imagens com src
+        document.querySelectorAll('img[src]').forEach(img => {
+            ajustarCaminho(img, 'src');
+        });
+    </script>
+    <!-- Fim do Script para Corrigir todos os caminhos SRC e HREF -->
 
-  <!-- DataTables  & Plugins -->
-  <script src="/WSEmaR/plugins/datatables/jquery.dataTables.min.js"></script>
-  <script src="/WSEmaR/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-  <script src="/WSEmaR/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-  <script src="/WSEmaR/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-  <script src="/WSEmaR/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-  <script src="/WSEmaR/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-  <script src="/WSEmaR/plugins/jszip/jszip.min.js"></script>
-  <script src="/WSEmaR/plugins/pdfmake/pdfmake.min.js"></script>
-  <script src="/WSEmaR/plugins/pdfmake/vfs_fonts.js"></script>
-  <script src="/WSEmaR/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-  <script src="/WSEmaR/plugins/datatables-buttons/js/buttons.print.min.js"></script>
-  <script src="/WSEmaR/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
-  
-  <style>
-    /* Para navegadores WebKit (Chrome, Safari, Edge) */
-    /* width */
-    ::-webkit-scrollbar {
-      background-color: #343a40;
-      width: 10px;
-    }
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WsEmar - Cockpit</title>
 
-    /* Track */
-    ::-webkit-scrollbar-track {
-      box-shadow: inset 0 0 5px #1b1f22;
-    }
-    
-    /* Handle */
-    ::-webkit-scrollbar-thumb {
-      background: #7a8795;
-    }
+    <!-- Favicons -->
+    <link href="/dist/img/favicon.png" rel="icon">
+    <link href="/dist/img/favicon.png" rel="apple-touch-icon">
 
-    /* Handle on hover */
-    ::-webkit-scrollbar-thumb:hover {
-      background: #525b64; 
-    }
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css">
+    <!-- overlayScrollbars -->
+    <link rel="stylesheet" href="/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="/dist/css/adminlte.min.css">
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="/plugins/daterangepicker/daterangepicker.css">
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet" href="/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+    <!-- DataTables -->
+    <link rel="stylesheet" href="/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
 
-    #periodoCockpit{
-      cursor: pointer;
-    }
-  </style>
+    <!-- REQUIRED SCRIPTS -->
+    <!-- jQuery -->
+    <script src="/plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="/plugins/sweetalert2/sweetalert2.min.js"></script>
+    <!-- Toastr -->
+    <script src="/plugins/toastr/toastr.min.js"></script>
+    <!-- overlayScrollbars -->
+    <script src="/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="/dist/js/adminlte.js"></script>
+
+    <!-- daterangepicker -->
+    <script src="/plugins/moment/moment.min.js"></script>
+    <script src="/plugins/moment/locales.min.js"></script>
+    <script src="/plugins/moment/moment-with-locales.min.js"></script>
+    <script src="/plugins/daterangepicker/daterangepicker.js"></script>
+
+    <!-- Tempusdominus Bootstrap 4 -->
+    <script src="/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+
+    <!-- DataTables  & Plugins -->
+    <script src="/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="/plugins/jszip/jszip.min.js"></script>
+    <script src="/plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="/plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+
+    <style>
+        /* Para navegadores WebKit (Chrome, Safari, Edge) */
+        /* width */
+        ::-webkit-scrollbar {
+            background-color: #343a40;
+            width: 10px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+            box-shadow: inset 0 0 5px #1b1f22;
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+            background: #7a8795;
+        }
+
+            /* Handle on hover */
+            ::-webkit-scrollbar-thumb:hover {
+                background: #525b64;
+            }
+
+        #periodoCockpit {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body class="hold-transition dark-mode sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
-<div class="wrapper">
+    <div class="wrapper">
 
-  <!-- Preloader -->
-  <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="animation__wobble" src="/WSEmaR/dist/img/websupply_logo_branco.png" alt="AdminLTELogo" width="200px">
-  </div>
-
-  <!-- Navbar -->
-  <nav class="main-header navbar navbar-expand navbar-dark">
-    <!-- Left navbar links -->
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-      </li>
-    </ul>
-
-    <!-- Right navbar links -->
-    <ul class="navbar-nav ml-auto">
-      <li class="nav-item">
-        <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-          <i class="fas fa-expand-arrows-alt"></i>
-        </a>
-      </li>
-    </ul>
-  </nav>
-  <!-- /.navbar -->
-
-  <!-- Main Sidebar Container -->
-  <aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <!-- Brand Logo -->
-    <a href="index3.html" class="brand-link text-center">
-      <img src="/WSEmaR/dist/img/websupply_logo_branco.png" alt="AdminLTE Logo" class="img-fluid" style="opacity: .8" width="150px">
-    </a>
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <!-- Sidebar user panel (optional) -->
-      <div class="user-panel justify-content-center align-items-center d-flex p-3 mb-2">
-        <div class="image">
-          <img src="/WSEmaR/dist/img/user2-160x160.png" class="img-circle elevation-2" alt="User Image">
+        <!-- Preloader -->
+        <div class="preloader flex-column justify-content-center align-items-center">
+            <img class="animation__wobble" src="/dist/img/websupply_logo_branco.png" alt="AdminLTELogo" width="200px">
         </div>
-        <div class="info">
-          <a href="#" class="d-block">WsEmar</a>
-        </div>
-      </div>
-      <!-- Sidebar Menu -->
-      <nav class="mt-2">
-        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <!-- Add icons to the links using the .nav-icon class
-               with font-awesome or any other icon font library -->
-          <li class="nav-item menu-open">
-            <a href="#" class="nav-link active">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Cockpit
-              </p>
+
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-dark">
+            <!-- Left navbar links -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+            </ul>
+
+            <!-- Right navbar links -->
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- /.navbar -->
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            <a href="index3.html" class="brand-link text-center">
+                <img src="/dist/img/websupply_logo_branco.png" alt="AdminLTE Logo" class="img-fluid" style="opacity: .8" width="150px">
             </a>
-          </li>
-        </ul>
-      </nav>
-      <!-- /.sidebar-menu -->
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Sidebar user panel (optional) -->
+                <div class="user-panel justify-content-center align-items-center d-flex p-3 mb-2">
+                    <div class="image">
+                        <img src="/dist/img/user2-160x160.png" class="img-circle elevation-2" alt="User Image">
+                    </div>
+                    <div class="info">
+                        <a href="#" class="d-block">WsEmar</a>
+                    </div>
+                </div>
+                <!-- Sidebar Menu -->
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                        <!-- Add icons to the links using the .nav-icon class
+                             with font-awesome or any other icon font library -->
+                        <li class="nav-item menu-open">
+                            <a href="#" class="nav-link active">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>
+                                    Cockpit
+                                </p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <div class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1 class="m-0">Cockpit</h1>
+                        </div><!-- /.col -->
+                        <div class="col-sm-6">
+                            <!-- <ol class="breadcrumb float-sm-right">
+                              <li class="breadcrumb-item"><a href="#">Cockpit</a></li>
+                              <li class="breadcrumb-item active">Dashboard v2</li>
+                            </ol> -->
+                        </div><!-- /.col -->
+                    </div><!-- /.row -->
+                </div><!-- /.container-fluid -->
+            </div>
+            <!-- /.content-header -->
+
+            <section class="content">
+                <div class="container-fluid">
+                    <!-- Inicio dos Dados do Ambiente -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Dados do Ambiente do Robô</h5>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="row">
+                                        <div class="col-lg-12 col-12">
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-center align-items-center">
+                                                    <h6 class="card-title text-center">Host</h6>
+                                                </div>
+                                                <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
+                                                    <h6 class="description-header mb-2" id="ambiente-host">
+                                                        <span class="badge badge-warning">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg col-12">
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-center align-items-center">
+                                                    <h6 class="card-title text-center">Status SSL</h6>
+                                                </div>
+                                                <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
+                                                    <h6 class="description-header mb-2" id="ambiente-status-ssl">
+                                                        <span class="badge badge-warning">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg col-12">
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-center align-items-center">
+                                                    <h6 class="card-title text-center">Hash SSL</h6>
+                                                </div>
+                                                <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
+                                                    <h6 class="description-header mb-2" id="ambiente-hash-ssl">
+                                                        <span class="badge badge-warning">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg col-12">
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-center align-items-center">
+                                                    <h6 class="card-title text-center">Validade SSL</h6>
+                                                </div>
+                                                <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
+                                                    <h6 class="description-header mb-2" id="ambiente-validade-ssl">
+                                                        <span class="badge badge-warning">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Fim dos Dados do Ambiente -->
+                    <!-- Inicio dos Dados do Servidor WebSocket -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Dados do Servidor Websocket</h5>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="row">
+                                        <div class="col-lg-12 col-12">
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-center align-items-center">
+                                                    <h6 class="card-title text-center">Host</h6>
+                                                </div>
+                                                <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
+                                                    <h6 class="description-header mb-2" id="websocket-host">
+                                                        <span class="badge badge-warning">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6 col-12">
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-center align-items-center">
+                                                    <h6 class="card-title text-center">Status do Servidor</h6>
+                                                </div>
+                                                <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
+                                                    <h6 class="description-header mb-2" id="websocket-status">
+                                                        <span class="badge badge-warning">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6 col-12">
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-center align-items-center">
+                                                    <h6 class="card-title text-center">Iniciado em</h6>
+                                                </div>
+                                                <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
+                                                    <h6 class="description-header mb-2" id="websocket-data-inicio">
+                                                        <span class="badge badge-warning">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg col-12">
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-center align-items-center">
+                                                    <h6 class="card-title text-center">Status SSL</h6>
+                                                </div>
+                                                <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
+                                                    <h6 class="description-header mb-2" id="websocket-status-ssl">
+                                                        <span class="badge badge-warning">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg col-12">
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-center align-items-center">
+                                                    <h6 class="card-title text-center">Hash SSL</h6>
+                                                </div>
+                                                <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
+                                                    <h6 class="description-header mb-2" id="websocket-hash-ssl">
+                                                        <span class="badge badge-warning">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg col-12">
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-center align-items-center">
+                                                    <h6 class="card-title text-center">Validade SSL</h6>
+                                                </div>
+                                                <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
+                                                    <h6 class="description-header mb-2" id="websocket-validade-ssl">
+                                                        <span class="badge badge-warning">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Fim dos Dados do Servidor WebSocket -->
+                    <!-- Inicio do Campo de Periodo -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Período</h5>
+                                </div>
+
+                                <div class="card-footer">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">
+                                                <i class="far fa-calendar-alt"></i>
+                                            </span>
+                                        </div>
+                                        <input type="text" class="form-control float-right" id="periodoCockpit">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Fim do Campo de Periodo -->
+                    <!-- Inicio dos Cards de E-Mails Processados -->
+                    <div class="row">
+                        <div class="col-12 col-sm-6 col-md">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-info elevation-1"><i class="fas fa-check-square"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Emails Processados</span>
+                                    <span class="info-box-number" id="total-PR">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-sm-6 col-md">
+                            <div class="info-box mb-3">
+                                <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-times-circle"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Emails Não Processados</span>
+                                    <span class="info-box-number" id="total-NP">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-sm-6 col-md">
+                            <div class="info-box mb-3">
+                                <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-exclamation-triangle"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Emails Spam</span>
+                                    <span class="info-box-number" id="total-SP">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Fim dos Cards de E-Mails Processados -->
+                    <!-- Main row -->
+                    <div class="row">
+                        <div class="col-12">
+                            <!-- Inicio Logs de Processamento de E-mails -->
+                            <div class="card">
+                                <div class="card-header border-transparent">
+                                    <h3 class="card-title">Logs de Processamento de E-Mails</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="table-responsive">
+                                        <table id="tabelaLogsEmarProcessamento" class="table table-bordered table-striped table-hover"></table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Fim Logs de Processamento de E-mails -->
+                        </div>
+                        <div class="col-12">
+                            <!-- Inicio Logs de Monitoramento do Robô -->
+                            <div class="card">
+                                <div class="card-header border-transparent">
+                                    <h3 class="card-title">Logs de Monitoramento do Robô</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="table-responsive">
+                                        <table id="tabelaLogsEmar" class="table table-bordered table-striped table-hover"></table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Fim Logs de Monitoramento do Robô -->
+                        </div>
+                        <div class="col-12">
+                            <!-- Inicio Logs do Websocket -->
+                            <div class="card">
+                                <div class="card-header border-transparent">
+                                    <h3 class="card-title">Logs do Websocket</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="table-responsive">
+                                        <table id="tabelaLogsWebSocket" class="table table-bordered table-striped table-hover"></table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Fim Logs do Websocket -->
+                        </div>
+                    </div>
+                    <!-- /.row -->
+                </div><!--/. container-fluid -->
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+        </aside>
+        <!-- /.control-sidebar -->
+        <!-- Main Footer -->
+        <footer class="main-footer">
+            <strong>Copyright &copy; 2014-2024 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
+            All rights reserved.
+            <div class="float-right d-none d-sm-inline-block">
+                <b>Version</b> 3.1.0
+            </div>
+        </footer>
     </div>
-    <!-- /.sidebar -->
-  </aside>
-
-  <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <div class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1 class="m-0">Cockpit</h1>
-          </div><!-- /.col -->
-          <div class="col-sm-6">
-            <!-- <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Cockpit</a></li>
-              <li class="breadcrumb-item active">Dashboard v2</li>
-            </ol> -->
-          </div><!-- /.col -->
-        </div><!-- /.row -->
-      </div><!-- /.container-fluid -->
-    </div>
-    <!-- /.content-header -->
-
-    <section class="content">
-      <div class="container-fluid">
-        <!-- Inicio dos Dados do Ambiente -->
-        <div class="row">
-          <div class="col-md-12">
-            <div class="card">
-              <div class="card-header">
-                <h5 class="card-title">Dados do Ambiente do Robô</h5>
-                <div class="card-tools">
-                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="card-footer">
-                <div class="row">
-                  <div class="col-lg-12 col-12">
-                    <div class="card">
-                      <div class="card-header d-flex justify-content-center align-items-center">
-                        <h6 class="card-title text-center">Host</h6>
-                      </div>
-                      <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
-                        <h6 class="description-header mb-2" id="ambiente-host">
-                          <span class="badge badge-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                          </span>
-                        </h6>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-lg col-12">
-                    <div class="card">
-                      <div class="card-header d-flex justify-content-center align-items-center">
-                        <h6 class="card-title text-center">Status SSL</h6>
-                      </div>
-                      <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
-                        <h6 class="description-header mb-2" id="ambiente-status-ssl">
-                          <span class="badge badge-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                          </span>
-                        </h6>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-lg col-12">
-                    <div class="card">
-                      <div class="card-header d-flex justify-content-center align-items-center">
-                        <h6 class="card-title text-center">Hash SSL</h6>
-                      </div>
-                      <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
-                        <h6 class="description-header mb-2" id="ambiente-hash-ssl">
-                          <span class="badge badge-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                          </span>
-                        </h6>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-lg col-12">
-                    <div class="card">
-                      <div class="card-header d-flex justify-content-center align-items-center">
-                        <h6 class="card-title text-center">Validade SSL</h6>
-                      </div>
-                      <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
-                        <h6 class="description-header mb-2" id="ambiente-validade-ssl">
-                          <span class="badge badge-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                          </span>
-                        </h6>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Fim dos Dados do Ambiente -->
-
-        <!-- Inicio dos Dados do Servidor WebSocket -->
-        <div class="row">
-          <div class="col-md-12">
-            <div class="card">
-              <div class="card-header">
-                <h5 class="card-title">Dados do Servidor Websocket</h5>
-                <div class="card-tools">
-                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="card-footer">
-                <div class="row">
-                  <div class="col-lg-5 col-12">
-                    <div class="card">
-                      <div class="card-header d-flex justify-content-center align-items-center">
-                        <h6 class="card-title text-center">Host</h6>
-                      </div>
-                      <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
-                        <h6 class="description-header mb-2" id="websocket-host">
-                          <span class="badge badge-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                          </span>
-                        </h6>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-lg col-12">
-                    <div class="card">
-                      <div class="card-header d-flex justify-content-center align-items-center">
-                        <h6 class="card-title text-center">Status do Servidor</h6>
-                      </div>
-                      <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
-                        <h6 class="description-header mb-2" id="websocket-status">
-                          <span class="badge badge-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                          </span>
-                        </h6>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-lg col-12">
-                    <div class="card">
-                      <div class="card-header d-flex justify-content-center align-items-center">
-                        <h6 class="card-title text-center">Iniciado em</h6>
-                      </div>
-                      <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
-                        <h6 class="description-header mb-2" id="websocket-data-inicio">
-                          <span class="badge badge-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                          </span>
-                        </h6>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-lg col-12">
-                    <div class="card">
-                      <div class="card-header d-flex justify-content-center align-items-center">
-                        <h6 class="card-title text-center">Status SSL</h6>
-                      </div>
-                      <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
-                        <h6 class="description-header mb-2" id="websocket-status-ssl">
-                          <span class="badge badge-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                          </span>
-                        </h6>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-lg-6 col-12">
-                    <div class="card">
-                      <div class="card-header d-flex justify-content-center align-items-center">
-                        <h6 class="card-title text-center">Hash SSL</h6>
-                      </div>
-                      <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
-                        <h6 class="description-header mb-2" id="websocket-hash-ssl">
-                          <span class="badge badge-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                          </span>
-                        </h6>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-lg-6 col-12">
-                    <div class="card">
-                      <div class="card-header d-flex justify-content-center align-items-center">
-                        <h6 class="card-title text-center">Validade SSL</h6>
-                      </div>
-                      <div class="card-footer d-flex justify-content-center align-items-center rounded-bottom">
-                        <h6 class="description-header mb-2" id="websocket-validade-ssl">
-                          <span class="badge badge-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                          </span>
-                        </h6>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Fim dos Dados do Servidor WebSocket -->
-        
-        <!-- Inicio do Campo de Periodo -->
-        <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header">
-                <h5 class="card-title">Período</h5>
-              </div>
-
-              <div class="card-footer">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">
-                      <i class="far fa-calendar-alt"></i>
-                    </span>
-                  </div>
-                  <input type="text" class="form-control float-right" id="periodoCockpit">
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Fim do Campo de Periodo -->
-
-        <!-- Inicio dos Cards de E-Mails Processados -->
-        <div class="row">
-          <div class="col-12 col-sm-6 col-md">
-            <div class="info-box">
-              <span class="info-box-icon bg-info elevation-1"><i class="fas fa-check-square"></i></span>
-              <div class="info-box-content">
-                <span class="info-box-text">Emails Processados</span>
-                <span class="info-box-number" id="total-PR">0</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="col-12 col-sm-6 col-md">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-times-circle"></i></span>
-              <div class="info-box-content">
-                <span class="info-box-text">Emails Não Processados</span>
-                <span class="info-box-number" id="total-NP">0</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-sm-6 col-md">
-            <div class="info-box mb-3">
-              <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-exclamation-triangle"></i></span>
-              <div class="info-box-content">
-                <span class="info-box-text">Emails Spam</span>
-                <span class="info-box-number" id="total-SP">0</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Fim dos Cards de E-Mails Processados -->
-
-        <!-- Main row -->
-        <div class="row">
-          <div class="col-12">
-            <!-- Inicio Logs de Processamento de E-mails -->
-            <div class="card">
-              <div class="card-header border-transparent">
-                <h3 class="card-title">Logs de Processamento de E-Mails</h3>
-                <div class="card-tools">
-                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="card-footer">
-                <div class="table-responsive">
-                  <table id="tabelaLogsEmarProcessamento" class="table table-bordered table-striped table-hover"></table>
-                </div>
-              </div>
-            </div>
-            <!-- Fim Logs de Processamento de E-mails -->
-          </div>
-          <div class="col-12">
-            <!-- Inicio Logs de Monitoramento do Robô -->
-            <div class="card">
-              <div class="card-header border-transparent">
-                <h3 class="card-title">Logs de Monitoramento do Robô</h3>
-                <div class="card-tools">
-                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="card-footer">
-                <div class="table-responsive">
-                  <table id="tabelaLogsEmar" class="table table-bordered table-striped table-hover"></table>
-                </div>
-              </div>
-            </div>
-            <!-- Fim Logs de Monitoramento do Robô -->
-          </div>
-          <div class="col-12">
-            <!-- Inicio Logs do Websocket -->
-            <div class="card">
-              <div class="card-header border-transparent">
-                <h3 class="card-title">Logs do Websocket</h3>
-                <div class="card-tools">
-                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="card-footer">
-                <div class="table-responsive">
-                  <table id="tabelaLogsWebSocket" class="table table-bordered table-striped table-hover"></table>
-                </div>
-              </div>
-            </div>
-            <!-- Fim Logs do Websocket -->
-          </div>
-        </div>
-        <!-- /.row -->
-      </div><!--/. container-fluid -->
-    </section>
-    <!-- /.content -->
-  </div>
-  <!-- /.content-wrapper -->
-
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark">
-    <!-- Control sidebar content goes here -->
-  </aside>
-  <!-- /.control-sidebar -->
-
-  <!-- Main Footer -->
-  <footer class="main-footer">
-    <strong>Copyright &copy; 2014-2024 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
-    All rights reserved.
-    <div class="float-right d-none d-sm-inline-block">
-      <b>Version</b> 3.1.0
-    </div>
-  </footer>
-</div>
-<!-- ./wrapper -->
-<!--WsEmar - Cockpit-->
-<script src="/WSEmaR/assets/js/constantes.js"></script>
-<script src="/WSEmaR/assets/js/cockpit.js"></script>
+    <!-- ./wrapper -->
+    <!--WsEmar - Cockpit-->
+    <script src="/assets/js/constantes.js"></script>
+    <script src="/assets/js/cockpit.js"></script>
 </body>
 </html>
