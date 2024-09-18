@@ -519,7 +519,15 @@
                 }
             }
         }
+    </script>
+    <!-- Fim do Script para Corrigir todos os caminhos SRC e HREF -->
 
+    <!--WsEmar - Cockpit-->
+    <script src="/assets/js/constantes.js"></script>
+    <script src="/assets/js/cockpit.js"></script>
+
+    <!-- Inicio da execução do script para Corrigir todos os caminhos SRC e HREF -->
+    <script>
         // Ajustar todos os <link> e <script> com href/src
         document.querySelectorAll('link[href], script[src]').forEach(el => {
             ajustarCaminho(el, el.hasAttribute('href') ? 'href' : 'src');
@@ -530,10 +538,6 @@
             ajustarCaminho(img, 'src');
         });
     </script>
-    <!-- Fim do Script para Corrigir todos os caminhos SRC e HREF -->
-
-    <!--WsEmar - Cockpit-->
-    <script src="/assets/js/constantes.js"></script>
-    <script src="/assets/js/cockpit.js"></script>
+    <!-- Fim da execução do script para Corrigir todos os caminhos SRC e HREF -->
 </body>
 </html>
