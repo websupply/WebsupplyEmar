@@ -1,5 +1,5 @@
 // Url do Ambiente
-const baseUrl = `${window.location.protocol}//${window.location.host}`;
+const baseUrl = `${window.location.protocol}//${window.location.host}/WSEmaR`;
 
 // Metodos da API
 const apiUrl = {
