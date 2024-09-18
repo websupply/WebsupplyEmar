@@ -511,7 +511,12 @@ function CarregaCards(){
 				"periodoFim": periodoFim
 			}
 		),
-		success: function(retorno) {
+		success: function (retorno) {
+			// Zera todos os cards
+			$("span[id='total-PR']").html(0);
+			$("span[id='total-NP']").html(0);
+			$("span[id='total-SP']").html(0);
+
 			// Realiza a renderização dos cards
 			for(var i = 0; i < retorno.Requisicao.Retorno._card.length; i++){
 				// Define a o registro
