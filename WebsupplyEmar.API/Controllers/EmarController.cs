@@ -579,7 +579,7 @@ namespace WebsupplyEmar.API.Controllers
                                                                                 nomeArquivoUnico = ID_Arquivo.ToString() + "." + nomeArquivoSplit[nomeArquivoSplit.Count() - 1];
 
                                                                                 // Seta o caminho completo de destino
-                                                                                caminhoDestino = Path.Combine(diretorioDestino, nomeOriginal);
+                                                                                caminhoDestino = Path.Combine(diretorioDestino, nomeArquivoUnico);
 
                                                                                 // Salva o arquivo
                                                                                 System.IO.File.WriteAllBytes(caminhoDestino, anexo.ContentBytes);
