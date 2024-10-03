@@ -123,8 +123,10 @@ namespace WebsupplyEmar.Dados.ADO
             }
         }
 
-        public static bool PROCESSA_ANEXO_PEDIDOITENS(string Connection, string cCDGPED, string cNome_Arquivo, string cCodProd, string cCGCF)
+        public static int PROCESSA_ANEXO_PEDIDOITENS(string Connection, string cCDGPED, string cNome_Arquivo, string cCodProd, string cCGCF)
         {
+            int ID_Arquivo = 0;
+
             ConexaoSQLServer Conn = new ConexaoSQLServer(Connection);
 
             string NomeProcedure = "SP_Cheil_PedidosItens_temp_Anexos_ins";
@@ -137,21 +139,34 @@ namespace WebsupplyEmar.Dados.ADO
 
             try
             {
-                Conn.ExecutaComParametros(NomeProcedure, parametros);
+                using (var reader = Conn.ExecutaComParametros(NomeProcedure, parametros))
+                {
+                    while (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            ID_Arquivo = Convert.ToInt32(reader["ID_Anexo"]);
+                        }
+                        reader.NextResult();
+                    }
+                }
+
                 Conn.Dispose();
 
-                return true;
+                return ID_Arquivo;
             }
             catch (Exception ex)
             {
                 Conn.Dispose();
 
-                return false;
+                return ID_Arquivo;
             }
         }
 
-        public static bool PROCESSA_ANEXO_CL_PROCESSO_ANEXO(string Connection, string CL_CDG, string TIPO, string ARQUIVO, string Visualiza)
+        public static int PROCESSA_ANEXO_CL_PROCESSO_ANEXO(string Connection, string CL_CDG, string TIPO, string ARQUIVO, string Visualiza)
         {
+            int ID_Arquivo = 0;
+
             ConexaoSQLServer Conn = new ConexaoSQLServer(Connection);
 
             string NomeProcedure = "SP_EMPRESA_CL_PROCESSO_ANEXO_INS";
@@ -164,16 +179,27 @@ namespace WebsupplyEmar.Dados.ADO
 
             try
             {
-                Conn.ExecutaComParametros(NomeProcedure, parametros);
+                using (var reader = Conn.ExecutaComParametros(NomeProcedure, parametros))
+                {
+                    while (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            ID_Arquivo = Convert.ToInt32(reader["ID_Anexo"]);
+                        }
+                        reader.NextResult();
+                    }
+                }
+
                 Conn.Dispose();
 
-                return true;
+                return ID_Arquivo;
             }
             catch (Exception ex)
             {
                 Conn.Dispose();
 
-                return false;
+                return ID_Arquivo;
             }
         }
 
